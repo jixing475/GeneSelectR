@@ -1,6 +1,7 @@
 project:
   type: website
   output-dir: _site
+  lib-dir: _site/site_libs
 
 # GitHub Pages configuration
 # The site will be published to https://<username>.github.io/<repo-name>/
