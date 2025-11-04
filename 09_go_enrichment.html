@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.43">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>GO Enrichment Analysis – GeneSelectR: A Literate Tour</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="_site/site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="_site/site_libs/quarto-nav/headroom.min.js"></script>
+<script src="_site/site_libs/clipboard/clipboard.min.js"></script>
+<script src="_site/site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="_site/site_libs/quarto-search/fuse.min.js"></script>
+<script src="_site/site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="_site/site_libs/quarto-html/quarto.js"></script>
+<script src="_site/site_libs/quarto-html/popper.min.js"></script>
+<script src="_site/site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="_site/site_libs/quarto-html/anchor.min.js"></script>
+<link href="_site/site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="_site/site_libs/quarto-html/quarto-syntax-highlighting-d4d76bf8491c20bad77d141916dc28e1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="_site/site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="_site/site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="_site/site_libs/bootstrap/bootstrap-dcc7d9e706e4adfbab8e3d6c7c60bab2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">GeneSelectR: A Literate Tour</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./01_overview.html"> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./02_setup_uv_reticulate.html"> 
+<span class="menu-text">Setup</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-core" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Core</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-core">    
+        <li>
+    <a class="dropdown-item" href="./03_core_classes.html">
+ <span class="dropdown-text">Core Classes: S4 Objects and Semantics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./04_python_integration.html">
+ <span class="dropdown-text">Python Integration: R ↔︎ Python Interface</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./05_feature_selection_and_search.html">
+ <span class="dropdown-text">Feature Selection and Hyperparameter Search</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-analysis" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Analysis</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-analysis">    
+        <li>
+    <a class="dropdown-item" href="./06_metrics_and_visualization.html">
+ <span class="dropdown-text">Metrics and Visualization</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./07_feature_importance.html">
+ <span class="dropdown-text">Feature Importance Estimation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./08_overlap_and_stability.html">
+ <span class="dropdown-text">Overlap and Stability Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./09_go_enrichment.html">
+ <span class="dropdown-text">GO Enrichment Analysis</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./10_end_to_end_demo.html"> 
+<span class="menu-text">Demo</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./11_synthesis.html"> 
+<span class="menu-text">Synthesis</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#from-genes-to-biology" id="toc-from-genes-to-biology" class="nav-link active" data-scroll-target="#from-genes-to-biology"><span class="header-section-number">1</span> From Genes to Biology</a></li>
+  <li><a href="#go-basics" id="toc-go-basics" class="nav-link" data-scroll-target="#go-basics"><span class="header-section-number">2</span> GO Basics</a>
+  <ul class="collapse">
+  <li><a href="#three-ontologies" id="toc-three-ontologies" class="nav-link" data-scroll-target="#three-ontologies"><span class="header-section-number">2.1</span> Three Ontologies</a></li>
+  <li><a href="#structure" id="toc-structure" class="nav-link" data-scroll-target="#structure"><span class="header-section-number">2.2</span> Structure</a></li>
+  </ul></li>
+  <li><a href="#enrichment-testing" id="toc-enrichment-testing" class="nav-link" data-scroll-target="#enrichment-testing"><span class="header-section-number">3</span> Enrichment Testing</a>
+  <ul class="collapse">
+  <li><a href="#hypergeometric-test" id="toc-hypergeometric-test" class="nav-link" data-scroll-target="#hypergeometric-test"><span class="header-section-number">3.1</span> Hypergeometric Test</a></li>
+  <li><a href="#multiple-testing-correction" id="toc-multiple-testing-correction" class="nav-link" data-scroll-target="#multiple-testing-correction"><span class="header-section-number">3.2</span> Multiple Testing Correction</a></li>
+  </ul></li>
+  <li><a href="#running-enrichment-with-go_enrichment_analysis" id="toc-running-enrichment-with-go_enrichment_analysis" class="nav-link" data-scroll-target="#running-enrichment-with-go_enrichment_analysis"><span class="header-section-number">4</span> Running Enrichment with <code>GO_enrichment_analysis()</code></a>
+  <ul class="collapse">
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">4.1</span> Setup</a></li>
+  <li><a href="#basic-enrichment" id="toc-basic-enrichment" class="nav-link" data-scroll-target="#basic-enrichment"><span class="header-section-number">4.2</span> Basic Enrichment</a></li>
+  <li><a href="#enrichment-for-all-methods" id="toc-enrichment-for-all-methods" class="nav-link" data-scroll-target="#enrichment-for-all-methods"><span class="header-section-number">4.3</span> Enrichment for All Methods</a></li>
+  </ul></li>
+  <li><a href="#visualization" id="toc-visualization" class="nav-link" data-scroll-target="#visualization"><span class="header-section-number">5</span> Visualization</a>
+  <ul class="collapse">
+  <li><a href="#dot-plot" id="toc-dot-plot" class="nav-link" data-scroll-target="#dot-plot"><span class="header-section-number">5.1</span> Dot Plot</a></li>
+  <li><a href="#bar-plot" id="toc-bar-plot" class="nav-link" data-scroll-target="#bar-plot"><span class="header-section-number">5.2</span> Bar Plot</a></li>
+  <li><a href="#network-plot" id="toc-network-plot" class="nav-link" data-scroll-target="#network-plot"><span class="header-section-number">5.3</span> Network Plot</a></li>
+  </ul></li>
+  <li><a href="#go-term-simplification" id="toc-go-term-simplification" class="nav-link" data-scroll-target="#go-term-simplification"><span class="header-section-number">6</span> GO Term Simplification</a>
+  <ul class="collapse">
+  <li><a href="#the-redundancy-problem" id="toc-the-redundancy-problem" class="nav-link" data-scroll-target="#the-redundancy-problem"><span class="header-section-number">6.1</span> The Redundancy Problem</a></li>
+  <li><a href="#using-run_simplify_enrichment" id="toc-using-run_simplify_enrichment" class="nav-link" data-scroll-target="#using-run_simplify_enrichment"><span class="header-section-number">6.2</span> Using <code>run_simplify_enrichment()</code></a></li>
+  <li><a href="#batch-simplification-with-run_multiple_simplifygo" id="toc-batch-simplification-with-run_multiple_simplifygo" class="nav-link" data-scroll-target="#batch-simplification-with-run_multiple_simplifygo"><span class="header-section-number">6.3</span> Batch Simplification with <code>run_multiple_simplifyGO()</code></a></li>
+  </ul></li>
+  <li><a href="#child-term-metrics" id="toc-child-term-metrics" class="nav-link" data-scroll-target="#child-term-metrics"><span class="header-section-number">7</span> Child Term Metrics</a>
+  <ul class="collapse">
+  <li><a href="#concept" id="toc-concept" class="nav-link" data-scroll-target="#concept"><span class="header-section-number">7.1</span> Concept</a></li>
+  <li><a href="#using-compute_go_child_term_metrics" id="toc-using-compute_go_child_term_metrics" class="nav-link" data-scroll-target="#using-compute_go_child_term_metrics"><span class="header-section-number">7.2</span> Using <code>compute_GO_child_term_metrics()</code></a></li>
+  </ul></li>
+  <li><a href="#design-rationale" id="toc-design-rationale" class="nav-link" data-scroll-target="#design-rationale"><span class="header-section-number">8</span> Design Rationale</a>
+  <ul class="collapse">
+  <li><a href="#why-entrezid" id="toc-why-entrezid" class="nav-link" data-scroll-target="#why-entrezid"><span class="header-section-number">8.1</span> Why ENTREZID?</a></li>
+  <li><a href="#why-background-matters" id="toc-why-background-matters" class="nav-link" data-scroll-target="#why-background-matters"><span class="header-section-number">8.2</span> Why Background Matters</a></li>
+  <li><a href="#why-simplify-terms" id="toc-why-simplify-terms" class="nav-link" data-scroll-target="#why-simplify-terms"><span class="header-section-number">8.3</span> Why Simplify Terms?</a></li>
+  </ul></li>
+  <li><a href="#troubleshooting" id="toc-troubleshooting" class="nav-link" data-scroll-target="#troubleshooting"><span class="header-section-number">9</span> Troubleshooting</a>
+  <ul class="collapse">
+  <li><a href="#no-enrichment-found" id="toc-no-enrichment-found" class="nav-link" data-scroll-target="#no-enrichment-found"><span class="header-section-number">9.1</span> “No enrichment found”</a></li>
+  <li><a href="#multiple-testing-correction-too-harsh" id="toc-multiple-testing-correction-too-harsh" class="nav-link" data-scroll-target="#multiple-testing-correction-too-harsh"><span class="header-section-number">9.2</span> “Multiple testing correction too harsh”</a></li>
+  </ul></li>
+  <li><a href="#example-workflow" id="toc-example-workflow" class="nav-link" data-scroll-target="#example-workflow"><span class="header-section-number">10</span> Example Workflow</a></li>
+  <li><a href="#interpretation-tips" id="toc-interpretation-tips" class="nav-link" data-scroll-target="#interpretation-tips"><span class="header-section-number">11</span> Interpretation Tips</a>
+  <ul class="collapse">
+  <li><a href="#concordance-across-methods" id="toc-concordance-across-methods" class="nav-link" data-scroll-target="#concordance-across-methods"><span class="header-section-number">11.1</span> Concordance Across Methods</a></li>
+  <li><a href="#method-specific-enrichments" id="toc-method-specific-enrichments" class="nav-link" data-scroll-target="#method-specific-enrichments"><span class="header-section-number">11.2</span> Method-Specific Enrichments</a></li>
+  <li><a href="#pathway-coherence" id="toc-pathway-coherence" class="nav-link" data-scroll-target="#pathway-coherence"><span class="header-section-number">11.3</span> Pathway Coherence</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">12</span> Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">GO Enrichment Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="from-genes-to-biology" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="from-genes-to-biology"><span class="header-section-number">1</span> From Genes to Biology</h2>
+<p>Feature selection yields <strong>gene lists</strong>, but the ultimate goal is <strong>biological interpretation</strong>:</p>
+<ul>
+<li>What pathways are perturbed?</li>
+<li>What cellular processes are affected?</li>
+<li>Are findings consistent with known disease mechanisms?</li>
+</ul>
+<p><strong>Gene Ontology (GO) enrichment</strong> tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes).</p>
+</section>
+<section id="go-basics" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="go-basics"><span class="header-section-number">2</span> GO Basics</h2>
+<section id="three-ontologies" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="three-ontologies"><span class="header-section-number">2.1</span> Three Ontologies</h3>
+<ol type="1">
+<li><strong>Biological Process (BP)</strong>: High-level processes (e.g., “immune response”)</li>
+<li><strong>Molecular Function (MF)</strong>: Biochemical activities (e.g., “kinase activity”)</li>
+<li><strong>Cellular Component (CC)</strong>: Subcellular locations (e.g., “mitochondrion”)</li>
+</ol>
+</section>
+<section id="structure" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="structure"><span class="header-section-number">2.2</span> Structure</h3>
+<p>GO is a <strong>directed acyclic graph (DAG)</strong>:</p>
+<ul>
+<li>Terms are nodes</li>
+<li>Relationships (is-a, part-of) are edges</li>
+<li>Child terms are more specific than parents</li>
+</ul>
+<p>Example:</p>
+<pre><code>immune system process (GO:0002376)
+  ├─ immune response (GO:0006955)
+  │   └─ T cell activation (GO:0042110)
+  └─ lymphocyte activation (GO:0046649)</code></pre>
+</section>
+</section>
+<section id="enrichment-testing" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="enrichment-testing"><span class="header-section-number">3</span> Enrichment Testing</h2>
+<section id="hypergeometric-test" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="hypergeometric-test"><span class="header-section-number">3.1</span> Hypergeometric Test</h3>
+<p>For each GO term, test:</p>
+<ul>
+<li><strong>k</strong>: Number of selected genes in term</li>
+<li><strong>n</strong>: Total selected genes</li>
+<li><strong>K</strong>: Number of background genes in term</li>
+<li><strong>N</strong>: Total background genes</li>
+</ul>
+<p><strong>Null hypothesis</strong>: Selected genes are randomly drawn from background.</p>
+<p><strong>p-value</strong>: Probability of observing ≥ k genes in term by chance.</p>
+</section>
+<section id="multiple-testing-correction" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="multiple-testing-correction"><span class="header-section-number">3.2</span> Multiple Testing Correction</h3>
+<p>Testing thousands of terms requires correction:</p>
+<ul>
+<li><strong>Bonferroni</strong>: Extremely conservative (p &lt; 0.05 / n_terms)</li>
+<li><strong>Benjamini-Hochberg (FDR)</strong>: Less conservative, controls false discovery rate</li>
+<li><strong>q-value</strong>: Similar to FDR, widely used in genomics</li>
+</ul>
+<p>GeneSelectR uses <strong>q &lt; 0.05</strong> (FDR-adjusted) by default.</p>
+</section>
+</section>
+<section id="running-enrichment-with-go_enrichment_analysis" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="running-enrichment-with-go_enrichment_analysis"><span class="header-section-number">4</span> Running Enrichment with <code>GO_enrichment_analysis()</code></h2>
+<section id="setup" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">4.1</span> Setup</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(clusterProfiler)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(org.Hs.eg.db)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>project_root <span class="ot">&lt;-</span> <span class="st">"/Users/zero/Desktop/GeneSelectR"</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>annotated <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">file.path</span>(project_root, <span class="st">"tests/testthat/fixtures/AnnotatedGeneLists.rds"</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>background <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">file.path</span>(project_root, <span class="st">"tests/testthat/fixtures/background.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Extract gene IDs:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example: Lasso-selected genes (ENTREZID required for clusterProfiler)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lasso_genes <span class="ot">&lt;-</span> annotated<span class="sc">@</span>inbuilt<span class="sc">$</span>Lasso<span class="sc">@</span>ENTREZID</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Number of genes:"</span>, <span class="fu">length</span>(lasso_genes), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="basic-enrichment" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="basic-enrichment"><span class="header-section-number">4.2</span> Basic Enrichment</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GeneSelectR)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>enrichment_results <span class="ot">&lt;-</span> <span class="fu">GO_enrichment_analysis</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">genes =</span> lasso_genes,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">background =</span> background,  <span class="co"># Background gene IDs</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ont =</span> <span class="st">"BP"</span>,  <span class="co"># Biological Process</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pAdjustMethod =</span> <span class="st">"BH"</span>,  <span class="co"># Benjamini-Hochberg</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">pvalueCutoff =</span> <span class="fl">0.05</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">qvalueCutoff =</span> <span class="fl">0.05</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Result is an enrichResult object from clusterProfiler</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(enrichment_results<span class="sc">@</span>result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Key columns</strong>:</p>
+<ul>
+<li><code>ID</code>: GO term ID</li>
+<li><code>Description</code>: Term name</li>
+<li><code>GeneRatio</code>: k/n (genes in term / total selected)</li>
+<li><code>BgRatio</code>: K/N (background genes in term / total background)</li>
+<li><code>pvalue</code>: Raw p-value</li>
+<li><code>p.adjust</code>: FDR-adjusted p-value</li>
+<li><code>geneID</code>: Gene symbols in term (separated by “/”)</li>
+</ul>
+</section>
+<section id="enrichment-for-all-methods" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="enrichment-for-all-methods"><span class="header-section-number">4.3</span> Enrichment for All Methods</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>methods <span class="ot">&lt;-</span> <span class="fu">names</span>(annotated<span class="sc">@</span>inbuilt)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>enrichment_list <span class="ot">&lt;-</span> <span class="fu">lapply</span>(methods, <span class="cf">function</span>(method) {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  genes <span class="ot">&lt;-</span> annotated<span class="sc">@</span>inbuilt[[method]]<span class="sc">@</span>ENTREZID</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">GO_enrichment_analysis</span>(genes, background, <span class="at">ont =</span> <span class="st">"BP"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(enrichment_list) <span class="ot">&lt;-</span> methods</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare top terms per method</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(enrichment_list, <span class="cf">function</span>(res) <span class="fu">head</span>(res<span class="sc">@</span>result<span class="sc">$</span>Description, <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="visualization" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="visualization"><span class="header-section-number">5</span> Visualization</h2>
+<section id="dot-plot" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="dot-plot"><span class="header-section-number">5.1</span> Dot Plot</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dotplot</span>(enrichment_results, <span class="at">showCategory =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Shows:</p>
+<ul>
+<li><strong>x-axis</strong>: Gene ratio (fraction of selected genes in term)</li>
+<li><strong>Dot size</strong>: Number of genes in term</li>
+<li><strong>Dot color</strong>: Adjusted p-value</li>
+</ul>
+</section>
+<section id="bar-plot" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="bar-plot"><span class="header-section-number">5.2</span> Bar Plot</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(enrichment_results, <span class="at">showCategory =</span> <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Simpler alternative to dot plot.</p>
+</section>
+<section id="network-plot" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="network-plot"><span class="header-section-number">5.3</span> Network Plot</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Requires enrichplot package</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(enrichplot)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cnetplot</span>(enrichment_results, <span class="at">categorySize =</span> <span class="st">"pvalue"</span>, <span class="at">foldChange =</span> <span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Shows gene-term network (which genes belong to which terms).</p>
+</section>
+</section>
+<section id="go-term-simplification" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="go-term-simplification"><span class="header-section-number">6</span> GO Term Simplification</h2>
+<section id="the-redundancy-problem" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="the-redundancy-problem"><span class="header-section-number">6.1</span> The Redundancy Problem</h3>
+<p>GO terms are hierarchical and overlapping:</p>
+<ul>
+<li>“immune response” and “adaptive immune response” share many genes</li>
+<li>Reporting both clutters results</li>
+</ul>
+<p><strong>Solution</strong>: Simplify to <strong>non-redundant representative terms</strong>.</p>
+</section>
+<section id="using-run_simplify_enrichment" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="using-run_simplify_enrichment"><span class="header-section-number">6.2</span> Using <code>run_simplify_enrichment()</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load enrichment result fixture</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>enrich_obj <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">file.path</span>(project_root, <span class="st">"tests/testthat/fixtures/EnrichGO.rds"</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>simplified <span class="ot">&lt;-</span> <span class="fu">run_simplify_enrichment</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  enrich_obj,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="st">"Wang"</span>,  <span class="co"># Semantic similarity measure</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">threshold =</span> <span class="fl">0.7</span>    <span class="co"># Terms with similarity &gt; 0.7 clustered together</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Result: clustered terms with representative term per cluster</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(simplified)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="batch-simplification-with-run_multiple_simplifygo" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="batch-simplification-with-run_multiple_simplifygo"><span class="header-section-number">6.3</span> Batch Simplification with <code>run_multiple_simplifyGO()</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplify enrichments for all methods</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>simplified_list <span class="ot">&lt;-</span> <span class="fu">run_multiple_simplifyGO</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  enrichment_list,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cutoff =</span> <span class="fl">0.7</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">by =</span> <span class="st">"p.adjust"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="st">"Wang"</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare simplified terms across methods</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(simplified_list, <span class="cf">function</span>(df) df<span class="sc">$</span>Description[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="child-term-metrics" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="child-term-metrics"><span class="header-section-number">7</span> Child Term Metrics</h2>
+<section id="concept" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="concept"><span class="header-section-number">7.1</span> Concept</h3>
+<p>GO parent terms can be overly broad (“metabolic process”). <strong>Child term enrichment</strong> refines interpretation by testing specific subtypes.</p>
+</section>
+<section id="using-compute_go_child_term_metrics" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="using-compute_go_child_term_metrics"><span class="header-section-number">7.2</span> Using <code>compute_GO_child_term_metrics()</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For a broad parent term, compute child enrichments</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>child_results <span class="ot">&lt;-</span> <span class="fu">compute_GO_child_term_metrics</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">parent_term =</span> <span class="st">"GO:0006955"</span>,  <span class="co"># immune response</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">genes =</span> lasso_genes,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">background =</span> background,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">org_db =</span> org.Hs.eg.db</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Result: enrichment of child terms under the parent</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(child_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Reveals which specific immune processes are enriched.</p>
+</section>
+</section>
+<section id="design-rationale" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="design-rationale"><span class="header-section-number">8</span> Design Rationale</h2>
+<section id="why-entrezid" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="why-entrezid"><span class="header-section-number">8.1</span> Why ENTREZID?</h3>
+<p>clusterProfiler requires Entrez IDs because:</p>
+<ul>
+<li>Stable across annotation updates</li>
+<li>Direct mapping to GO annotations in Bioconductor org.db packages</li>
+</ul>
+<p>GeneSelectR converts symbols → ENTREZID via <code>annotate_gene_lists()</code>.</p>
+</section>
+<section id="why-background-matters" class="level3" data-number="8.2">
+<h3 data-number="8.2" class="anchored" data-anchor-id="why-background-matters"><span class="header-section-number">8.2</span> Why Background Matters</h3>
+<p><strong>Wrong</strong>: Test against all genes in the genome<br>
+<strong>Right</strong>: Test against genes on your assay platform (e.g., microarray probes, RNA-seq detected genes)</p>
+<p>Using the wrong background inflates p-values (genes not assayed can’t be selected).</p>
+</section>
+<section id="why-simplify-terms" class="level3" data-number="8.3">
+<h3 data-number="8.3" class="anchored" data-anchor-id="why-simplify-terms"><span class="header-section-number">8.3</span> Why Simplify Terms?</h3>
+<p>Raw enrichment results often contain:</p>
+<ul>
+<li>100+ significant terms (overwhelming)</li>
+<li>Highly redundant terms (e.g., “T cell activation” and “regulation of T cell activation”)</li>
+</ul>
+<p>Simplification reduces redundancy while preserving biological insights.</p>
+</section>
+</section>
+<section id="troubleshooting" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="troubleshooting"><span class="header-section-number">9</span> Troubleshooting</h2>
+<section id="no-enrichment-found" class="level3" data-number="9.1">
+<h3 data-number="9.1" class="anchored" data-anchor-id="no-enrichment-found"><span class="header-section-number">9.1</span> “No enrichment found”</h3>
+<p>Possible causes:</p>
+<ol type="1">
+<li><strong>Too few genes</strong>: &lt;10 genes may lack power</li>
+<li><strong>Wrong background</strong>: Background doesn’t overlap selected genes</li>
+<li><strong>Stringent cutoffs</strong>: Relax <code>qvalueCutoff</code> to 0.10</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check background overlap</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">intersect</span>(lasso_genes, background))  <span class="co"># Should be close to length(lasso_genes)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Relax cutoffs</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">GO_enrichment_analysis</span>(lasso_genes, background, <span class="at">qvalueCutoff =</span> <span class="fl">0.10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="multiple-testing-correction-too-harsh" class="level3" data-number="9.2">
+<h3 data-number="9.2" class="anchored" data-anchor-id="multiple-testing-correction-too-harsh"><span class="header-section-number">9.2</span> “Multiple testing correction too harsh”</h3>
+<p>For exploratory analysis:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">GO_enrichment_analysis</span>(lasso_genes, background, <span class="at">pAdjustMethod =</span> <span class="st">"none"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">WARNING</span><span class="co">: Increases false positives; use cautiously</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="example-workflow" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="example-workflow"><span class="header-section-number">10</span> Example Workflow</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Run feature selection</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">perform_grid_search</span>(X, y, ...)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Annotate gene lists</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>annotated <span class="ot">&lt;-</span> <span class="fu">annotate_gene_lists</span>(results, <span class="at">species =</span> <span class="st">"Homo.sapiens"</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Define background (all genes assayed)</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>background <span class="ot">&lt;-</span> <span class="fu">colnames</span>(X)  <span class="co"># Or load from fixture</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Enrichment for each method</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>methods <span class="ot">&lt;-</span> <span class="fu">names</span>(annotated<span class="sc">@</span>inbuilt)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>enrichments <span class="ot">&lt;-</span> <span class="fu">lapply</span>(methods, <span class="cf">function</span>(m) {</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  genes <span class="ot">&lt;-</span> annotated<span class="sc">@</span>inbuilt[[m]]<span class="sc">@</span>ENTREZID</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">GO_enrichment_analysis</span>(genes, background, <span class="at">ont =</span> <span class="st">"BP"</span>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(enrichments) <span class="ot">&lt;-</span> methods</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Simplify redundant terms</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>simplified <span class="ot">&lt;-</span> <span class="fu">run_multiple_simplifyGO</span>(enrichments, <span class="at">cutoff =</span> <span class="fl">0.7</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 6. Visualize</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="fu">dotplot</span>(enrichments<span class="sc">$</span>Lasso, <span class="at">showCategory =</span> <span class="dv">20</span>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 7. Export results</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(simplified<span class="sc">$</span>Lasso, <span class="st">"lasso_go_enrichment.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="interpretation-tips" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="interpretation-tips"><span class="header-section-number">11</span> Interpretation Tips</h2>
+<section id="concordance-across-methods" class="level3" data-number="11.1">
+<h3 data-number="11.1" class="anchored" data-anchor-id="concordance-across-methods"><span class="header-section-number">11.1</span> Concordance Across Methods</h3>
+<p>If multiple methods enrich similar GO terms:</p>
+<ul>
+<li><strong>Strong signal</strong>: Biological process is robustly associated with phenotype</li>
+<li><strong>Confidence</strong>: Results less likely to be spurious</li>
+</ul>
+</section>
+<section id="method-specific-enrichments" class="level3" data-number="11.2">
+<h3 data-number="11.2" class="anchored" data-anchor-id="method-specific-enrichments"><span class="header-section-number">11.2</span> Method-Specific Enrichments</h3>
+<p>If only one method enriches a term:</p>
+<ul>
+<li><strong>May be real</strong>: Method captures unique signal (e.g., LASSO finds linear drivers)</li>
+<li><strong>May be noise</strong>: Validate with external data or literature</li>
+</ul>
+</section>
+<section id="pathway-coherence" class="level3" data-number="11.3">
+<h3 data-number="11.3" class="anchored" data-anchor-id="pathway-coherence"><span class="header-section-number">11.3</span> Pathway Coherence</h3>
+<p>Selected genes should form coherent pathways:</p>
+<ul>
+<li><strong>Good</strong>: Genes in “T cell activation” interact in known networks</li>
+<li><strong>Suspicious</strong>: Genes have no known interactions (may be false positives)</li>
+</ul>
+<p>Use tools like STRING or GeneMANIA to validate.</p>
+</section>
+</section>
+<section id="summary" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="summary"><span class="header-section-number">12</span> Summary</h2>
+<p>GeneSelectR’s GO enrichment pipeline:</p>
+<ol type="1">
+<li><strong>Annotates</strong> selected genes (symbol → ENTREZID)</li>
+<li><strong>Tests</strong> for overrepresentation in GO terms (hypergeometric test)</li>
+<li><strong>Simplifies</strong> redundant terms (semantic similarity clustering)</li>
+<li><strong>Visualizes</strong> enrichments (dot plots, bar plots, networks)</li>
+</ol>
+<p>The next chapter demonstrates an end-to-end workflow on real data.</p>
+<hr>
+<p><strong>Next</strong>: <a href="./10_end_to_end_demo.html">End-to-End Demo</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
