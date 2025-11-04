@@ -209,7 +209,7 @@ Columns:
 ::: {.cell}
 
 ```{.r .cell-code}
-library(GeneSelectR)
+# library(GeneSelectR)
 
 plot_feature_importance(
   results,
@@ -235,14 +235,8 @@ Expected output: Horizontal bar plot of top 20 features.
 
 ```{.r .cell-code}
 # Inbuilt
-p1 <- plot_feature_importance(results, "Lasso", "inbuilt", top_n = 15)
-
-# Permutation
-p2 <- plot_feature_importance(results, "Lasso", "permutation", top_n = 15)
-
-# Side-by-side
-library(patchwork)
-p1 + p2 + plot_layout(ncol = 2)
+p <- plot_feature_importance(results,  top_n = 10)
+p
 ```
 :::
 
