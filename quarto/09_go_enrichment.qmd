@@ -1,0 +1,356 @@
+---
+title: "GO Enrichment Analysis"
+keep-md: true
+execute:
+  cache: true
+  freeze: auto
+  warning: false
+  message: false
+---
+
+## From Genes to Biology
+
+Feature selection yields **gene lists**, but the ultimate goal is **biological interpretation**:
+
+- What pathways are perturbed?
+- What cellular processes are affected?
+- Are findings consistent with known disease mechanisms?
+
+**Gene Ontology (GO) enrichment** tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes).
+
+## GO Basics
+
+### Three Ontologies
+
+1. **Biological Process (BP)**: High-level processes (e.g., "immune response")
+2. **Molecular Function (MF)**: Biochemical activities (e.g., "kinase activity")
+3. **Cellular Component (CC)**: Subcellular locations (e.g., "mitochondrion")
+
+### Structure
+
+GO is a **directed acyclic graph (DAG)**:
+
+- Terms are nodes
+- Relationships (is-a, part-of) are edges
+- Child terms are more specific than parents
+
+Example:
+
+```
+immune system process (GO:0002376)
+  ├─ immune response (GO:0006955)
+  │   └─ T cell activation (GO:0042110)
+  └─ lymphocyte activation (GO:0046649)
+```
+
+## Enrichment Testing
+
+### Hypergeometric Test
+
+For each GO term, test:
+
+- **k**: Number of selected genes in term
+- **n**: Total selected genes
+- **K**: Number of background genes in term
+- **N**: Total background genes
+
+**Null hypothesis**: Selected genes are randomly drawn from background.
+
+**p-value**: Probability of observing ≥ k genes in term by chance.
+
+### Multiple Testing Correction
+
+Testing thousands of terms requires correction:
+
+- **Bonferroni**: Extremely conservative (p < 0.05 / n_terms)
+- **Benjamini-Hochberg (FDR)**: Less conservative, controls false discovery rate
+- **q-value**: Similar to FDR, widely used in genomics
+
+GeneSelectR uses **q < 0.05** (FDR-adjusted) by default.
+
+## Running Enrichment with `GO_enrichment_analysis()`
+
+### Setup
+
+```{r load-data, eval=FALSE}
+suppressPackageStartupMessages({
+  library(clusterProfiler)
+  library(org.Hs.eg.db)
+})
+
+project_root <- "/Users/zero/Desktop/GeneSelectR"
+annotated <- readRDS(file.path(project_root, "tests/testthat/fixtures/AnnotatedGeneLists.rds"))
+background <- readRDS(file.path(project_root, "tests/testthat/fixtures/background.rds"))
+```
+
+Extract gene IDs:
+
+```{r extract-ids, eval=FALSE}
+# Example: Lasso-selected genes (ENTREZID required for clusterProfiler)
+lasso_genes <- annotated@inbuilt$Lasso@ENTREZID
+cat("Number of genes:", length(lasso_genes), "\n")
+```
+
+### Basic Enrichment
+
+```{r enrichment-basic, eval=FALSE}
+library(GeneSelectR)
+
+enrichment_results <- GO_enrichment_analysis(
+  genes = lasso_genes,
+  background = background,  # Background gene IDs
+  ont = "BP",  # Biological Process
+  pAdjustMethod = "BH",  # Benjamini-Hochberg
+  pvalueCutoff = 0.05,
+  qvalueCutoff = 0.05
+)
+
+# Result is an enrichResult object from clusterProfiler
+head(enrichment_results@result)
+```
+
+**Key columns**:
+
+- `ID`: GO term ID
+- `Description`: Term name
+- `GeneRatio`: k/n (genes in term / total selected)
+- `BgRatio`: K/N (background genes in term / total background)
+- `pvalue`: Raw p-value
+- `p.adjust`: FDR-adjusted p-value
+- `geneID`: Gene symbols in term (separated by "/")
+
+### Enrichment for All Methods
+
+```{r enrichment-all, eval=FALSE}
+methods <- names(annotated@inbuilt)
+
+enrichment_list <- lapply(methods, function(method) {
+  genes <- annotated@inbuilt[[method]]@ENTREZID
+  GO_enrichment_analysis(genes, background, ont = "BP")
+})
+names(enrichment_list) <- methods
+
+# Compare top terms per method
+lapply(enrichment_list, function(res) head(res@result$Description, 5))
+```
+
+## Visualization
+
+### Dot Plot
+
+```{r dotplot, eval=FALSE}
+dotplot(enrichment_results, showCategory = 20)
+```
+
+Shows:
+
+- **x-axis**: Gene ratio (fraction of selected genes in term)
+- **Dot size**: Number of genes in term
+- **Dot color**: Adjusted p-value
+
+### Bar Plot
+
+```{r barplot, eval=FALSE}
+barplot(enrichment_results, showCategory = 15)
+```
+
+Simpler alternative to dot plot.
+
+### Network Plot
+
+```{r network, eval=FALSE}
+# Requires enrichplot package
+library(enrichplot)
+cnetplot(enrichment_results, categorySize = "pvalue", foldChange = NULL)
+```
+
+Shows gene-term network (which genes belong to which terms).
+
+## GO Term Simplification
+
+### The Redundancy Problem
+
+GO terms are hierarchical and overlapping:
+
+- "immune response" and "adaptive immune response" share many genes
+- Reporting both clutters results
+
+**Solution**: Simplify to **non-redundant representative terms**.
+
+### Using `run_simplify_enrichment()`
+
+```{r simplify, eval=FALSE}
+# Load enrichment result fixture
+enrich_obj <- readRDS(file.path(project_root, "tests/testthat/fixtures/EnrichGO.rds"))
+
+simplified <- run_simplify_enrichment(
+  enrich_obj,
+  measure = "Wang",  # Semantic similarity measure
+  threshold = 0.7    # Terms with similarity > 0.7 clustered together
+)
+
+# Result: clustered terms with representative term per cluster
+head(simplified)
+```
+
+### Batch Simplification with `run_multiple_simplifyGO()`
+
+```{r simplify-batch, eval=FALSE}
+# Simplify enrichments for all methods
+simplified_list <- run_multiple_simplifyGO(
+  enrichment_list,
+  cutoff = 0.7,
+  by = "p.adjust",
+  measure = "Wang"
+)
+
+# Compare simplified terms across methods
+lapply(simplified_list, function(df) df$Description[1:5])
+```
+
+## Child Term Metrics
+
+### Concept
+
+GO parent terms can be overly broad ("metabolic process"). **Child term enrichment** refines interpretation by testing specific subtypes.
+
+### Using `compute_GO_child_term_metrics()`
+
+```{r child-terms, eval=FALSE}
+# For a broad parent term, compute child enrichments
+child_results <- compute_GO_child_term_metrics(
+  parent_term = "GO:0006955",  # immune response
+  genes = lasso_genes,
+  background = background,
+  org_db = org.Hs.eg.db
+)
+
+# Result: enrichment of child terms under the parent
+head(child_results)
+```
+
+Reveals which specific immune processes are enriched.
+
+## Design Rationale
+
+### Why ENTREZID?
+
+clusterProfiler requires Entrez IDs because:
+
+- Stable across annotation updates
+- Direct mapping to GO annotations in Bioconductor org.db packages
+
+GeneSelectR converts symbols → ENTREZID via `annotate_gene_lists()`.
+
+### Why Background Matters
+
+**Wrong**: Test against all genes in the genome  
+**Right**: Test against genes on your assay platform (e.g., microarray probes, RNA-seq detected genes)
+
+Using the wrong background inflates p-values (genes not assayed can't be selected).
+
+### Why Simplify Terms?
+
+Raw enrichment results often contain:
+
+- 100+ significant terms (overwhelming)
+- Highly redundant terms (e.g., "T cell activation" and "regulation of T cell activation")
+
+Simplification reduces redundancy while preserving biological insights.
+
+## Troubleshooting
+
+### "No enrichment found"
+
+Possible causes:
+
+1. **Too few genes**: <10 genes may lack power
+2. **Wrong background**: Background doesn't overlap selected genes
+3. **Stringent cutoffs**: Relax `qvalueCutoff` to 0.10
+
+```{r troubleshoot, eval=FALSE}
+# Check background overlap
+length(intersect(lasso_genes, background))  # Should be close to length(lasso_genes)
+
+# Relax cutoffs
+GO_enrichment_analysis(lasso_genes, background, qvalueCutoff = 0.10)
+```
+
+### "Multiple testing correction too harsh"
+
+For exploratory analysis:
+
+```{r relax, eval=FALSE}
+GO_enrichment_analysis(lasso_genes, background, pAdjustMethod = "none")
+# WARNING: Increases false positives; use cautiously
+```
+
+## Example Workflow
+
+```{r workflow, eval=FALSE}
+# 1. Run feature selection
+results <- perform_grid_search(X, y, ...)
+
+# 2. Annotate gene lists
+annotated <- annotate_gene_lists(results, species = "Homo.sapiens")
+
+# 3. Define background (all genes assayed)
+background <- colnames(X)  # Or load from fixture
+
+# 4. Enrichment for each method
+methods <- names(annotated@inbuilt)
+enrichments <- lapply(methods, function(m) {
+  genes <- annotated@inbuilt[[m]]@ENTREZID
+  GO_enrichment_analysis(genes, background, ont = "BP")
+})
+names(enrichments) <- methods
+
+# 5. Simplify redundant terms
+simplified <- run_multiple_simplifyGO(enrichments, cutoff = 0.7)
+
+# 6. Visualize
+dotplot(enrichments$Lasso, showCategory = 20)
+
+# 7. Export results
+write.csv(simplified$Lasso, "lasso_go_enrichment.csv")
+```
+
+## Interpretation Tips
+
+### Concordance Across Methods
+
+If multiple methods enrich similar GO terms:
+
+- **Strong signal**: Biological process is robustly associated with phenotype
+- **Confidence**: Results less likely to be spurious
+
+### Method-Specific Enrichments
+
+If only one method enriches a term:
+
+- **May be real**: Method captures unique signal (e.g., LASSO finds linear drivers)
+- **May be noise**: Validate with external data or literature
+
+### Pathway Coherence
+
+Selected genes should form coherent pathways:
+
+- **Good**: Genes in "T cell activation" interact in known networks
+- **Suspicious**: Genes have no known interactions (may be false positives)
+
+Use tools like STRING or GeneMANIA to validate.
+
+## Summary
+
+GeneSelectR's GO enrichment pipeline:
+
+1. **Annotates** selected genes (symbol → ENTREZID)
+2. **Tests** for overrepresentation in GO terms (hypergeometric test)
+3. **Simplifies** redundant terms (semantic similarity clustering)
+4. **Visualizes** enrichments (dot plots, bar plots, networks)
+
+The next chapter demonstrates an end-to-end workflow on real data.
+
+---
+
+**Next**: [End-to-End Demo](10_end_to_end_demo.qmd)

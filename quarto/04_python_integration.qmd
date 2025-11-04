@@ -1,0 +1,304 @@
+---
+title: "Python Integration: R ↔ Python Interface"
+keep-md: true
+execute:
+  cache: true
+  freeze: auto
+  warning: false
+  message: false
+---
+
+## The reticulate Bridge
+
+GeneSelectR uses **reticulate** to call Python code from R. Unlike system calls or JSON-based APIs, reticulate:
+
+- **Imports Python modules** as R objects
+- **Converts data structures** bidirectionally (data.frame ↔ pandas DataFrame, list ↔ dict)
+- **Preserves object references** across language boundaries
+- **Handles errors** by translating Python exceptions to R errors
+
+This enables seamless workflows like:
+
+```{r eval=FALSE}
+# Import Python module
+sklearn <- reticulate::import("sklearn")
+
+# Call Python function with R data
+model <- sklearn$ensemble$RandomForestClassifier(n_estimators = 100L)
+
+# Python object methods accessible via $
+model$fit(X_train, y_train)
+predictions <- model$predict(X_test)
+```
+
+## GeneSelectR's Python Modules
+
+The package defines four Python modules in `inst/python/`:
+
+1. **`GeneSelectR.py`**: Core pipeline execution
+2. **`fit_and_evaluate_pipelines.py`**: Test set evaluation
+3. **`geneset_stability.py`**: Bootstrap stability analysis
+4. **`correlation_filter.py`**: Feature preprocessing
+
+These are imported and called by R wrapper functions.
+
+## Module Import Workflow
+
+### Step 1: Import at Package Load
+
+`R/import_python_packages.R` defines the import logic:
+
+```{r show-import, eval=FALSE}
+import_python_packages <- function() {
+  
+  sklearn <<- reticulate::import("sklearn", delay_load = TRUE)
+  np <<- reticulate::import("numpy", delay_load = TRUE)
+  skopt <<- reticulate::import("skopt", delay_load = TRUE)
+  boruta <<- reticulate::import("boruta", delay_load = TRUE)
+  sys <<- reticulate::import("sys", delay_load = TRUE)
+  multiprocessing <<- reticulate::import("multiprocessing", delay_load = TRUE)
+  
+  # Import custom modules from inst/python
+  GeneSelectR_py <<- reticulate::import_from_path(
+    "GeneSelectR", 
+    path = system.file("python", package = "GeneSelectR")
+  )
+  
+  fit_and_evaluate <<- reticulate::import_from_path(
+    "fit_and_evaluate_pipelines",
+    path = system.file("python", package = "GeneSelectR")
+  )
+  
+  geneset_stability_py <<- reticulate::import_from_path(
+    "geneset_stability",
+    path = system.file("python", package = "GeneSelectR")
+  )
+  
+  correlation_filter <<- reticulate::import_from_path(
+    "correlation_filter",
+    path = system.file("python", package = "GeneSelectR")
+  )
+}
+```
+
+**Key details**:
+
+- `delay_load = TRUE`: Postpones import until first use (faster package load)
+- `import_from_path()`: Loads local `.py` files (not installed packages)
+- `<<-`: Assigns to package namespace (global within package)
+
+### Step 2: Module Availability Check
+
+Before calling Python functions, verify modules exist:
+
+```{r check-modules, eval=FALSE}
+if (!reticulate::py_module_available("sklearn")) {
+  stop("scikit-learn not found. Install with: uv pip install scikit-learn")
+}
+```
+
+GeneSelectR includes `skip_if_no_modules()` for conditional test execution.
+
+## Data Type Conversion
+
+### R → Python
+
+| R Type          | Python Type           | Notes                          |
+|-----------------|-----------------------|--------------------------------|
+| `numeric`       | `numpy.ndarray`       | Always converted to arrays     |
+| `integer`       | `int` or `np.int64`   | Use `100L` for explicit int    |
+| `character`     | `str`                 | Direct mapping                 |
+| `list`          | `list`                | Recursive conversion           |
+| `data.frame`    | `pandas.DataFrame`    | Column names preserved         |
+| `matrix`        | `numpy.ndarray`       | Row-major to column-major flip |
+
+**Critical**: scikit-learn expects integer labels, not strings. GeneSelectR converts:
+
+```{r label-conversion, eval=FALSE}
+# R factor → Python int array
+y_labels <- as.integer(factor(y)) - 1L  # 0-indexed
+```
+
+### Python → R
+
+| Python Type        | R Type          | Notes                         |
+|--------------------|-----------------|-------------------------------|
+| `np.ndarray`       | `matrix`/`array`| Depends on dimensions         |
+| `pd.DataFrame`     | `data.frame`    | Index becomes row names       |
+| `dict`             | `list`          | Named list                    |
+| `list`             | `list`          | Direct mapping                |
+| `None`             | `NULL`          | Direct mapping                |
+
+**Gotcha**: Python 0-indexed arrays become 1-indexed R vectors. GeneSelectR handles this in feature importance extraction.
+
+## Calling Python Functions from R
+
+### Example 1: `define_sklearn_modules()`
+
+This R function wraps Python imports:
+
+```{r define-modules, eval=FALSE}
+define_sklearn_modules <- function() {
+  preprocessing <- sklearn$preprocessing
+  model_selection <- sklearn$model_selection
+  feature_selection <- sklearn$feature_selection
+  ensemble <- sklearn$ensemble
+  
+  forest <- sklearn$ensemble$RandomForestClassifier
+  lasso <- sklearn$linear_model$LogisticRegression
+  
+  return(list(
+    preprocessing = preprocessing,
+    forest = forest,
+    lasso = lasso,
+    ...
+  ))
+}
+```
+
+Returns a list of Python class references (not instances).
+
+### Example 2: `create_pipelines()`
+
+Builds scikit-learn `Pipeline` objects:
+
+```{r create-pipelines, eval=FALSE}
+create_pipelines <- function(preprocessing_steps, fs_methods, classifier, modules) {
+  pipelines <- list()
+  
+  for (method_name in names(fs_methods)) {
+    steps <- c(
+      preprocessing_steps,
+      list(feature_selector = fs_methods[[method_name]]),
+      list(classifier = classifier)
+    )
+    
+    # Call Python Pipeline constructor
+    pipeline <- modules$pipeline$Pipeline(steps = steps)
+    pipelines[[method_name]] <- pipeline
+  }
+  
+  return(pipelines)
+}
+```
+
+The resulting list contains Python `Pipeline` objects, ready for `.fit()`.
+
+### Example 3: `perform_grid_search()`
+
+Calls custom Python function:
+
+```{r grid-search, eval=FALSE}
+perform_grid_search <- function(pipelines, param_grids, X, y, ...) {
+  # Convert R data to Python-compatible format
+  X_py <- r_to_py(X)
+  y_py <- r_to_py(as.integer(y) - 1L)
+  
+  # Call inst/python/GeneSelectR.py function
+  results <- GeneSelectR_py$perform_grid_search_with_feature_importance(
+    pipelines = pipelines,
+    param_grids = param_grids,
+    X = X_py,
+    y = y_py,
+    cv = 5L,
+    n_jobs = -1L
+  )
+  
+  # Results is a Python dict; accessible as R list
+  return(results)
+}
+```
+
+## Design Decisions
+
+### Why Not Pure Python?
+
+Keeping R as the primary interface:
+
+- Leverages Bioconductor for GO enrichment (no Python equivalent)
+- Familiar to bioinformaticians already using R
+- Easier integration with R Markdown/Quarto for reports
+
+### Why Not Pure R?
+
+Delegating ML to Python:
+
+- scikit-learn is more mature than R's caret/tidymodels for this use case
+- Faster execution (compiled C/C++ backends)
+- Boruta implementation only available in Python
+
+### Why Not Just Call Scripts?
+
+reticulate is superior to `system("python script.py")` because:
+
+- No file I/O overhead (direct memory sharing)
+- Better error handling (Python tracebacks visible in R)
+- Interactive debugging (inspect Python objects in R session)
+
+## Troubleshooting
+
+### "Module not found" despite installation
+
+```{r check-path, eval=FALSE}
+# Verify Python interpreter
+reticulate::py_config()
+
+# Check sys.path
+reticulate::py_run_string("import sys; print(sys.path)")
+
+# Manually add path
+reticulate::py_run_string("sys.path.append('/path/to/packages')")
+```
+
+### "Conversion not possible"
+
+```{r force-conversion, eval=FALSE}
+# Force conversion to NumPy array
+X_py <- reticulate::np_array(as.matrix(X))
+
+# Force integer type
+y_py <- reticulate::np_array(as.integer(y), dtype = "int32")
+```
+
+### "AttributeError: module has no attribute X"
+
+Likely a delayed load issue. Force import:
+
+```{r force-import, eval=FALSE}
+sklearn <- reticulate::import("sklearn", delay_load = FALSE)
+```
+
+## Performance Considerations
+
+### Memory Copying
+
+reticulate **copies** data between R and Python by default. For large datasets:
+
+```{r memory-note, eval=FALSE}
+# Before: 10GB matrix → 20GB total memory (R + Python)
+X_py <- r_to_py(X)
+
+# Consider chunking if memory-constrained
+```
+
+### Parallelization
+
+scikit-learn's `n_jobs = -1` uses all CPU cores, but:
+
+- On Windows, requires special setup (`enable_multiprocess()`)
+- May conflict with R's parallel backends (avoid mixing)
+
+## Summary
+
+GeneSelectR's Python integration:
+
+1. **Imports modules** via `reticulate` at package load
+2. **Converts data types** automatically (with type hints for sklearn)
+3. **Calls Python functions** as if they were R functions
+4. **Returns results** as R-native objects (lists, data.frames)
+
+This architecture allows Python-based ML pipelines to integrate seamlessly into R-based bioinformatics workflows.
+
+---
+
+**Next**: [Feature Selection and Hyperparameter Search](05_feature_selection_and_search.qmd)

@@ -1,0 +1,206 @@
+---
+title: "Environment Setup with uv and reticulate"
+keep-md: true
+execute:
+  cache: true
+  freeze: auto
+  warning: false
+  message: false
+---
+
+## Philosophy: Reproducible Python Environments
+
+GeneSelectR uses **uv** for Python dependency management instead of traditional `pip` + `virtualenv` because:
+
+1. **Speed**: uv is written in Rust and is 10-100× faster than pip
+2. **Determinism**: Lockfile-style resolution ensures reproducible installs
+3. **Simplicity**: Single tool for environment creation and package management
+
+The R-Python bridge is handled by **reticulate**, which allows seamless calling of Python objects and functions from R.
+
+## Setting Up the Python Environment
+
+### Step 1: Install uv (if not already installed)
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or via Homebrew
+brew install uv
+```
+
+### Step 2: Create a Virtual Environment
+
+From the GeneSelectR project root:
+
+```bash
+cd /Users/zero/Desktop/GeneSelectR
+uv venv .venv
+```
+
+This creates a `.venv/` directory containing an isolated Python installation.
+
+### Step 3: Install Python Dependencies
+
+GeneSelectR's Python requirements are specified in `inst/python/requirements.txt`:
+
+```bash
+uv pip install -r inst/python/requirements.txt
+```
+
+This installs:
+
+- `scikit-learn`: Core ML algorithms
+- `numpy`, `pandas`: Data manipulation
+- `scikit-optimize`: Bayesian hyperparameter optimization
+- `boruta`: Boruta feature selection
+- Additional dependencies as needed
+
+### Step 4: Bind reticulate to the uv Environment
+
+In R, point reticulate to the uv-managed Python interpreter:
+
+```{r setup-reticulate}
+library(tidyverse)
+library(reticulate)
+
+# Point to the uv venv
+project_root <- "/Users/zero/Desktop/GeneSelectR"
+venv_path <- file.path(project_root, ".venv")
+Sys.unsetenv("RETICULATE_PYTHON")
+use_python(file.path(venv_path, "bin", "python"), required = TRUE)
+
+# Verify configuration
+py_config()
+```
+
+**Output** (example):
+
+```
+python:         /Users/zero/Desktop/GeneSelectR/.venv/bin/python
+libpython:      /Users/zero/Desktop/GeneSelectR/.venv/lib/libpython3.11.dylib
+pythonhome:     /Users/zero/Desktop/GeneSelectR/.venv
+version:        3.11.5
+numpy:          /Users/zero/Desktop/GeneSelectR/.venv/lib/python3.11/site-packages/numpy
+sklearn:        /Users/zero/Desktop/GeneSelectR/.venv/lib/python3.11/site-packages/sklearn
+```
+
+### Step 5: Test the Connection
+
+```{r test-import, eval=FALSE}
+# Import Python modules via reticulate
+sklearn <- import("sklearn")
+np <- import("numpy")
+
+# Check versions
+cat("scikit-learn version:", sklearn$`__version__`, "\n")
+cat("numpy version:", np$`__version__`, "\n")
+```
+
+If imports succeed without errors, the environment is ready.
+
+## Reproducibility Guarantees
+
+### Cache and Freeze
+
+Quarto's `freeze: auto` setting ensures:
+
+- Computation results are cached after first render
+- Re-renders only happen when source `.qmd` changes
+- Prevents drift from upstream package updates during documentation updates
+
+### Random Seeds
+
+For reproducible machine learning:
+
+```{r set-seeds, eval=FALSE}
+set.seed(42)  # R seed
+py_run_string("import numpy as np; np.random.seed(42)")  # Python seed
+```
+
+Pass `random_state` parameters to sklearn functions explicitly.
+
+### Environment Snapshots
+
+To capture exact package versions:
+
+```bash
+uv pip freeze > requirements.lock
+```
+
+Restore later with:
+
+```bash
+uv pip install -r requirements.lock
+```
+
+## Design Rationale
+
+### Why Not Conda/Mamba?
+
+While Conda is popular in bioinformatics, uv offers:
+
+- **Lighter weight**: No 500MB+ base installation
+- **Faster installs**: Parallel downloads and installs
+- **Better R integration**: Standard Python venvs work seamlessly with reticulate
+
+### Why Not renv for Python?
+
+R's `renv` can manage Python, but:
+
+- Less mature than uv for Python-specific workflows
+- Slower package resolution
+- Limited support for scikit-learn's binary dependencies
+
+### Why Separate from Package Installation?
+
+GeneSelectR does **not** bundle Python dependencies in the R package because:
+
+1. **CRAN policy**: Binary Python packages would bloat package size
+2. **Flexibility**: Users may have existing ML environments
+3. **Isolation**: Documentation environment is independent of package tests
+
+## Troubleshooting
+
+### "Python module not found"
+
+```r
+# Check module availability
+py_module_available("sklearn")
+
+# List installed packages
+py_run_string("import pkg_resources; print([p.project_name for p in pkg_resources.working_set])")
+```
+
+### "Wrong Python version"
+
+Ensure `use_python()` points to the uv venv:
+
+```r
+Sys.which("python")  # Should NOT be system Python
+py_config()$python   # Should be /path/to/.venv/bin/python
+```
+
+### "Segmentation fault on import"
+
+Likely a binary compatibility issue. Rebuild the environment:
+
+```bash
+rm -rf .venv
+uv venv .venv
+uv pip install -r inst/python/requirements.txt
+```
+
+## Summary
+
+With uv and reticulate configured:
+
+1. Python dependencies are isolated in `.venv/`
+2. R can call Python functions via `import()` and `py_run_*()`
+3. Reproducibility is ensured via lockfiles and caching
+4. No modifications to GeneSelectR source code are needed
+
+---
+
+**Next**: [Core Classes: S4 Objects and Semantics](03_core_classes.qmd)

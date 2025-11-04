@@ -1,0 +1,260 @@
+---
+title: "Core Classes: S4 Objects and Semantics"
+keep-md: true
+execute:
+  cache: true
+  freeze: auto
+  warning: false
+  message: false
+---
+
+## Why S4 for GeneSelectR?
+
+R offers multiple object systems (S3, S4, R6, R7). GeneSelectR uses **S4** because:
+
+1. **Formal contracts**: Slots have enforced types (e.g., `list`, `data.frame`)
+2. **Method dispatch**: Generic functions can specialize on class signatures
+3. **Bioconductor compatibility**: Most Bioconductor classes use S4 (e.g., `SummarizedExperiment`)
+4. **Validation**: Custom validity methods ensure object consistency
+
+The three core classes are:
+
+- **`PipelineResults`**: Complete output from feature selection workflows
+- **`GeneList`**: Gene identifiers in three naming systems
+- **`AnnotatedGeneLists`**: Collection of `GeneList` objects per method
+
+## Class Definitions
+
+### `PipelineResults`
+
+Container for all outputs from `perform_grid_search()`:
+
+```{r load-libs, echo=FALSE, message=FALSE}
+suppressPackageStartupMessages({
+  library(methods)
+})
+```
+
+```{r show-pipeline-class, eval=FALSE}
+setClass("PipelineResults",
+         slots = list(
+           best_pipeline = "list",              # Winning hyperparameters
+           cv_results = "list",                 # Full CV results per method
+           inbuilt_feature_importance = "list", # Model-based importances
+           permutation_importance = "list",     # Permutation importances
+           cv_mean_score = "data.frame",        # Aggregated CV scores
+           test_metrics = "TestMetrics"         # Test set performance (df or list)
+         ))
+```
+
+**Slot semantics**:
+
+- `best_pipeline`: Named list with keys like `"method"`, `"scaler"`, `"params"`, `"score"`
+- `cv_results`: Nested list where `cv_results[[method]]` contains sklearn's `cv_results_` dict
+- `inbuilt_feature_importance`: List of numeric vectors (feature → importance)
+- `permutation_importance`: List of data.frames with columns `feature`, `importance_mean`, `importance_std`
+- `cv_mean_score`: data.frame with columns `method`, `mean_score`, `sd_score`, `rank`
+- `test_metrics`: Either a data.frame (single split) or list of data.frames (multiple splits)
+
+**Design rationale**: Keeping all outputs in one object simplifies downstream analysis and avoids scattered artifacts.
+
+### Loading a Real Object
+
+Let's load a `PipelineResults` fixture from the test suite:
+
+```{r load-pipeline-results}
+project_root <- "/Users/zero/Desktop/GeneSelectR"
+devtools::load_all(project_root)
+fixture_path <- file.path(project_root, "tests/testthat/fixtures/PipelineResults.rds")
+
+pipeline_results <- readRDS(fixture_path)
+
+# Inspect structure
+cat("Class:", class(pipeline_results), "\n")
+cat("Slots:", slotNames(pipeline_results), "\n")
+```
+
+#### Best Pipeline
+
+```{r best-pipeline, eval=FALSE}
+str(pipeline_results@best_pipeline, max.level = 1)
+```
+
+The best pipeline includes the winning method name, hyperparameters, and CV score.
+
+#### CV Mean Scores
+
+```{r cv-scores}
+head(pipeline_results@cv_mean_score)
+```
+
+Each row represents a feature selection method, ranked by cross-validation performance.
+
+#### Feature Importances
+
+```{r feature-importances}
+# Inbuilt importances (top 5 features per method)
+lapply(pipeline_results@inbuilt_feature_importance, function(x) head(x, 5))
+```
+
+Each method yields a named numeric vector where names are feature identifiers and values are importance scores.
+
+### `GeneList`
+
+Simple container for gene identifiers in three formats:
+
+```{r show-genelist-class, eval=FALSE}
+setClass("GeneList",
+         slots = list(
+           SYMBOL = "character",   # Official gene symbols (e.g., "TP53")
+           ENSEMBL = "character",  # Ensembl IDs (e.g., "ENSG00000141510")
+           ENTREZID = "character"  # NCBI Entrez IDs (e.g., "7157")
+         ))
+
+```
+
+**Why three formats?**
+
+- `SYMBOL`: Human-readable, used in publications
+- `ENSEMBL`: Stable across species, used in genomic databases
+- `ENTREZID`: Required for clusterProfiler GO enrichment
+
+Conversion is handled by `annotate_gene_lists()` using org.db annotation packages.
+
+### `AnnotatedGeneLists`
+
+Collection of `GeneList` objects, stratified by importance type:
+
+```{r show-annotated-class, eval=FALSE}
+setClass("AnnotatedGeneLists",
+         representation(
+           inbuilt = "list",      # List of GeneList objects (model-based)
+           permutation = "list"   # List of GeneList objects (permutation-based)
+         ))
+
+
+```
+
+**Structure**:
+
+```
+AnnotatedGeneLists
+├── inbuilt
+│   ├── Lasso → GeneList(SYMBOL, ENSEMBL, ENTREZID)
+│   ├── RandomForest → GeneList(...)
+│   └── Univariate → GeneList(...)
+└── permutation
+    ├── Lasso → GeneList(...)
+    └── ...
+```
+
+Each named element corresponds to a feature selection method.
+
+### Loading Annotated Gene Lists
+
+```{r load-annotated}
+annotated_path <- file.path(project_root, "tests/testthat/fixtures/AnnotatedGeneLists.rds")
+annotated_lists <- readRDS(annotated_path)
+
+cat("Class:", class(annotated_lists), "\n")
+cat("Inbuilt methods:", names(annotated_lists@inbuilt), "\n")
+cat("Permutation methods:", names(annotated_lists@permutation), "\n")
+```
+
+#### Inspecting a Single GeneList
+
+```{r inspect-genelist}
+# Example: Lasso inbuilt features
+lasso_genes <- annotated_lists@inbuilt$Lasso
+
+cat("Number of genes:", length(lasso_genes@SYMBOL), "\n")
+cat("First 5 symbols:", head(lasso_genes@SYMBOL, 5), "\n")
+cat("First 5 Ensembl:", head(lasso_genes@ENSEMBL, 5), "\n")
+```
+
+## Class Usage Patterns
+
+### Creating Objects Manually
+
+Typically, users don't create these objects directly—they're returned by package functions. But for testing:
+
+```{r create-genelist, eval=FALSE}
+my_genes <- new("GeneList",
+                SYMBOL = c("TP53", "EGFR", "BRCA1"),
+                ENSEMBL = c("ENSG00000141510", "ENSG00000146648", "ENSG00000012048"),
+                ENTREZID = c("7157", "1956", "672"))
+```
+
+### Accessing Slots
+
+```{r access-slots, eval=FALSE}
+# Direct slot access (discouraged in production code)
+pipeline_results@best_pipeline
+
+# Better: Define accessor methods
+setGeneric("getBestPipeline", function(object) standardGeneric("getBestPipeline"))
+setMethod("getBestPipeline", "PipelineResults", function(object) object@best_pipeline)
+```
+
+GeneSelectR provides minimal accessors; users typically access slots directly in interactive analysis.
+
+### Type Safety
+
+```{r type-safety, eval=FALSE}
+# This would fail at object creation:
+bad_pipeline <- new("PipelineResults",
+                    best_pipeline = "not a list",  # Type mismatch!
+                    cv_results = list(),
+                    ...)
+# Error: invalid class "PipelineResults" object: 
+# invalid object for slot "best_pipeline" in class "PipelineResults": 
+# got class "character", should be or extend class "list"
+```
+
+## Design Trade-offs
+
+### S4 vs S3
+
+**S4 advantages**:
+
+- Compile-time type checking
+- Formal documentation via `@slot` tags
+- Method dispatch on multiple arguments (not used in GeneSelectR but available)
+
+**S4 disadvantages**:
+
+- Verbose syntax (`@` instead of `$`)
+- Steeper learning curve
+- Slower object creation (negligible for GeneSelectR's use case)
+
+### S4 vs R6
+
+R6 offers:
+
+- Reference semantics (modify in-place)
+- Private fields and methods
+- Simpler inheritance
+
+But GeneSelectR chose S4 for **immutability** and **Bioconductor alignment**. Pipeline results should not be modified after creation.
+
+### Flat vs Nested Structures
+
+`PipelineResults` could have been split into separate objects (`CVResults`, `ImportanceResults`, etc.), but:
+
+- A single object simplifies API: `results <- perform_grid_search(...)`
+- All related outputs are bundled for archiving (`saveRDS(results, "run1.rds")`)
+- Downstream functions expect a consistent input type
+
+## Summary
+
+GeneSelectR's S4 classes provide:
+
+1. **Type-safe containers** for complex ML outputs
+2. **Self-documenting code** via slot definitions
+3. **Seamless integration** with Bioconductor tools
+
+The next chapter explores how these objects are populated via Python integration.
+
+---
+
+**Next**: [Python Integration: R ↔ Python Interface](04_python_integration.qmd)

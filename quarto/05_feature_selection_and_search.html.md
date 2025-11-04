@@ -1,0 +1,459 @@
+---
+title: "Feature Selection and Hyperparameter Search"
+keep-md: true
+execute:
+  cache: true
+  freeze: auto
+  warning: false
+  message: false
+---
+
+
+
+
+
+## Pipeline Architecture
+
+GeneSelectR uses scikit-learn's `Pipeline` abstraction to chain:
+
+1. **Preprocessing**: Variance thresholding, standardization
+2. **Feature selection**: LASSO, Random Forest, Univariate, Boruta
+3. **Classification**: Gradient Boosting (for metric evaluation)
+
+Each component is a transformer or estimator with `.fit()` and `.transform()` or `.predict()` methods.
+
+### Example Pipeline
+
+```
+Pipeline([
+  ('variance', VarianceThreshold(threshold=0.85)),
+  ('scaler', StandardScaler()),
+  ('feature_selector', SelectFromModel(RandomForestClassifier())),
+  ('classifier', GradientBoostingClassifier())
+])
+```
+
+During `.fit()`, data flows sequentially:
+
+```
+Raw features → VarianceThreshold → StandardScaler → Feature selector → Classifier
+```
+
+## Feature Selection Methods
+
+GeneSelectR supports four methods by default:
+
+### 1. LASSO (L1 Regularization)
+
+Logistic regression with L1 penalty drives irrelevant coefficients to zero.
+
+**Hyperparameters**:
+
+- `C`: Inverse regularization strength (smaller = more regularization)
+- `solver`: Optimization algorithm (`liblinear`, `saga`)
+
+**When to use**: Linear relationships, high interpretability
+
+**Limitations**: Assumes linearity; may miss non-linear patterns
+
+### 2. Random Forest Importance
+
+Tree-based importance via mean decrease in impurity (Gini importance).
+
+**Hyperparameters**:
+
+- `n_estimators`: Number of trees (more = better but slower)
+- `threshold`: Importance cutoff (`median`, `mean`, or numeric)
+
+**When to use**: Non-linear relationships, feature interactions
+
+**Limitations**: Biased toward high-cardinality features; can overfit
+
+### 3. Univariate Selection
+
+Statistical tests (e.g., ANOVA F-test) for each feature vs. target.
+
+**Hyperparameters**:
+
+- `param`: Number of top features to keep
+
+**When to use**: Fast screening, high-dimensional data
+
+**Limitations**: Ignores feature interactions; univariate only
+
+### 4. Boruta
+
+Iterative algorithm comparing original features to "shadow" features (permuted).
+
+**Hyperparameters**:
+
+- `n_estimators`: Trees per iteration
+- `perc`: Percentile for importance comparison
+
+**When to use**: All-relevant features (not just predictive)
+
+**Limitations**: Slow; may select many features
+
+## Hyperparameter Grid Search
+
+### Grid Definition
+
+`set_default_param_grids()` defines search spaces:
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+fs_param_grids <- list(
+  "Lasso" = list(
+    "feature_selector__estimator__C" = c(0.01, 0.1, 1, 10),
+    "feature_selector__estimator__solver" = c("liblinear", "saga")
+  ),
+  "Univariate" = list(
+    "feature_selector__param" = seq(10, max_features, by = step_size)
+  ),
+  "RandomForest" = list(
+    "feature_selector__estimator__n_estimators" = c(50L, 100L, 200L)
+  ),
+  "boruta" = list()  # No tunable hyperparameters in this implementation
+)
+```
+:::
+
+
+
+
+**Parameter naming**: `<step_name>__<param_name>` (double underscore for nested access).
+
+### Search Strategy
+
+GeneSelectR uses **GridSearchCV** (exhaustive search):
+
+- All combinations of hyperparameters tested
+- Cross-validation score computed per combination
+- Best combination selected per method
+
+**Alternative**: `RandomizedSearchCV` for faster (but approximate) search.
+
+### Cross-Validation
+
+5-fold stratified CV by default:
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+# Data split into 5 folds
+# Each fold used once as validation, 4 times as training
+# Average performance across folds = CV score
+
+Fold 1: [Train][Train][Train][Train][Val]
+Fold 2: [Train][Train][Train][Val][Train]
+Fold 3: [Train][Train][Val][Train][Train]
+Fold 4: [Train][Val][Train][Train][Train]
+Fold 5: [Val][Train][Train][Train][Train]
+```
+:::
+
+
+
+
+**Stratified**: Class proportions preserved in each fold (critical for imbalanced datasets).
+
+## Workflow Example
+
+### Step 1: Define Modules
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+library(GeneSelectR)
+
+# Import Python sklearn components
+modules <- define_sklearn_modules()
+```
+:::
+
+
+
+
+### Step 2: Configure Feature Selection
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+max_features <- 100  # Maximum genes to select
+
+# Get preprocessing steps and default methods
+fs_setup <- set_default_fs_methods(modules, max_features, random_state = 42)
+
+preprocessing_steps <- fs_setup$preprocessing_steps
+fs_methods <- fs_setup$default_feature_selection_methods
+```
+:::
+
+
+
+
+### Step 3: Create Pipelines
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+classifier <- modules$GradBoost(random_state = 42)
+
+pipelines <- create_pipelines(
+  preprocessing_steps = preprocessing_steps,
+  fs_methods = fs_methods,
+  classifier = classifier,
+  modules = modules
+)
+
+# pipelines is a list of Pipeline objects, one per method
+names(pipelines)  # "Lasso", "Univariate", "RandomForest", "boruta"
+```
+:::
+
+
+
+
+### Step 4: Define Parameter Grids
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+param_grids <- set_default_param_grids(max_features)
+```
+:::
+
+
+
+
+### Step 5: Execute Grid Search (Lightweight Example)
+
+To keep runtime low, we'll use a small fixture:
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+project_root <- "/Users/zero/Desktop/GeneSelectR"
+fixture_path <- file.path(project_root, "tests/testthat/fixtures/UrbanRandomSubset.rda")
+
+load(fixture_path)  # Loads 'UrbanRandomSubset' data.frame
+
+# Extract data (first column is treatment/group, rest are features)
+y <- UrbanRandomSubset[, 1]
+X <- as.matrix(UrbanRandomSubset[, -1])
+
+# Convert character matrix to numeric
+for(i in 1:ncol(X)) {
+  X[, i] <- as.numeric(X[, i])
+}
+
+cat("Data dimensions:", dim(X), "\n")
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+Data dimensions: 60 1000 
+```
+
+
+:::
+
+```{.r .cell-code}
+cat("Classes:", table(y), "\n")
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+Classes: 31 29 
+```
+
+
+:::
+:::
+
+
+
+
+Run grid search (set `eval=FALSE` for full dataset):
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+results <- perform_grid_search(
+  pipelines = pipelines,
+  param_grids = param_grids,
+  X = X,
+  y = y,
+  cv = 3,  # Reduced for speed
+  scoring = "f1_weighted",
+  random_state = 42,
+  calculate_permutation_importance = FALSE,
+  n_jobs = 2  # Use fewer cores for demo
+)
+
+# results is a PipelineResults object
+class(results)
+```
+:::
+
+
+
+
+### Step 6: Inspect Results
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+# Best method and score
+best <- results@best_pipeline
+cat("Best method:", best$method, "\n")
+cat("Best score:", best$score, "\n")
+
+# Compare methods
+head(results@cv_mean_score)
+
+# Top features for each method
+lapply(results@inbuilt_feature_importance, function(x) head(names(x), 10))
+```
+:::
+
+
+
+
+## Design Rationale
+
+### Why Grid Search Over Bayesian Optimization?
+
+Grid search is:
+
+- **Deterministic**: Same results every run (given fixed seed)
+- **Parallelizable**: Independent evaluations
+- **Simple**: No surrogate model hyperparameters
+
+Bayesian optimization (via scikit-optimize) is available but adds complexity.
+
+### Why Stratified CV?
+
+Gene expression datasets often have:
+
+- Small sample sizes (n < 100)
+- Imbalanced classes (e.g., 70% control, 30% disease)
+
+Stratification ensures each fold is representative.
+
+### Why Gradient Boosting for Classification?
+
+GradientBoostingClassifier is:
+
+- **Robust**: Handles high-dimensional data well
+- **Accurate**: Often outperforms simpler models
+- **Fast enough**: For the small feature subsets post-selection
+
+But the choice is modular—users can substitute other classifiers.
+
+## Performance Tips
+
+### Reduce Search Space
+
+For faster iteration:
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+quick_grid <- list(
+  "Lasso" = list(
+    "feature_selector__estimator__C" = c(0.1, 1)  # Only 2 values instead of 4
+  )
+)
+```
+:::
+
+
+
+
+### Parallelize Across Methods
+
+Run each method's grid search separately:
+
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+library(parallel)
+
+cl <- makeCluster(detectCores() - 1)
+results_list <- parLapply(cl, names(pipelines), function(method_name) {
+  # Run grid search for single method
+  ...
+})
+stopCluster(cl)
+```
+:::
+
+
+
+
+### Cache Results
+
+Use Quarto's caching:
+
+````markdown
+::: {.cell}
+
+```{.r .cell-code}
+results <- perform_grid_search(...)
+```
+:::
+````
+
+Results persist across renders unless code changes.
+
+## Summary
+
+GeneSelectR's pipeline approach:
+
+1. **Standardizes** ML workflows via scikit-learn Pipelines
+2. **Compares** multiple feature selection methods systematically
+3. **Optimizes** hyperparameters via cross-validation
+4. **Outputs** structured results in `PipelineResults` objects
+
+The next chapter explores how to visualize and interpret these results.
+
+---
+
+**Next**: [Metrics and Visualization](06_metrics_and_visualization.qmd)

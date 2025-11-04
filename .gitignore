@@ -1,0 +1,25 @@
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+.rds 
+/results
+inst/doc
+/vignettes/example_cache
+R/draft.R
+inst/extras
+
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Quarto
+/.quarto/
+*_cache/
+*_files/
+
+# Keep the built site for GitHub Pages
+# quarto/_site is intentionally tracked
+

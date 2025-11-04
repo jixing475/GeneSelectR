@@ -1,0 +1,140 @@
+---
+title: "Overview: A High-Level Map of GeneSelectR"
+keep-md: true
+execute:
+  cache: true
+  freeze: auto
+  warning: false
+  message: false
+---
+
+## What GeneSelectR Solves
+
+GeneSelectR addresses a fundamental challenge in bioinformatics: **identifying robust, biologically meaningful gene signatures from high-dimensional genomic data**. The package combines:
+
+- Multiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)
+- Hyperparameter optimization via grid search
+- Cross-validation and test set evaluation
+- Feature importance estimation (both model-based and permutation-based)
+- Gene set overlap and stability analysis
+- GO enrichment analysis for functional interpretation
+
+The core innovation is a **hybrid R-Python architecture** that leverages R's bioinformatics ecosystem (Bioconductor) while harnessing Python's scikit-learn for efficient machine learning pipelines.
+
+## Architecture Overview
+
+### R Components (`R/`)
+
+The R layer provides:
+
+1. **Core workflow orchestration** (`GeneSelectR.R`):
+   - `define_sklearn_modules()`: Bridge to Python ML modules
+   - `set_default_fs_methods()`: Configure feature selection methods
+   - `create_pipelines()`: Build scikit-learn pipelines via reticulate
+   - `perform_grid_search()`: Execute hyperparameter optimization
+
+2. **S4 class system** (`classes.R`):
+   - `PipelineResults`: Container for CV results, feature importances, metrics
+   - `GeneList`: Gene identifiers (SYMBOL, ENSEMBL, ENTREZID)
+   - `AnnotatedGeneLists`: Collection of gene lists per method
+
+3. **Evaluation and visualization**:
+   - `calculate_mean_cv_scores()`, `evaluate_test_metrics()`: Performance metrics
+   - `plot_metrics()`, `plot_feature_importance()`: Diagnostic plots
+   - `calculate_overlap_coefficients()`, `plot_overlap_heatmaps()`: Gene set comparison
+
+4. **Bioinformatics integration**:
+   - `GO_enrichment_analysis()`: clusterProfiler-based enrichment
+   - `run_simplify_enrichment()`, `run_multiple_simplifyGO()`: GO term simplification
+   - `annotate_gene_lists()`: Convert symbols to IDs
+
+### Python Components (`inst/python/`)
+
+Python modules handle computationally intensive tasks:
+
+1. **`GeneSelectR.py`**: Core pipeline execution
+   - Grid search with cross-validation
+   - Feature importance calculation
+   - Model training and evaluation
+
+2. **`fit_and_evaluate_pipelines.py`**: Test set evaluation
+   - Out-of-sample performance metrics
+   - Standardized scoring across methods
+
+3. **`geneset_stability.py`**: Stability analysis
+   - Feature selection across bootstrap samples
+   - Jaccard index for gene set overlap
+
+4. **`correlation_filter.py`**: Preprocessing utilities
+   - Redundancy removal via correlation thresholding
+
+## Data Flow
+
+```
+Input Data (expression matrix + labels)
+    ↓
+[R] create_pipelines() → build sklearn Pipeline objects
+    ↓
+[Python] perform_grid_search() → hyperparameter optimization
+    ↓
+[R] PipelineResults object ← extract results via reticulate
+    ↓
+[R] get_feature_importances() → extract top genes
+    ↓
+[R] annotate_gene_lists() → map SYMBOL ↔ ENSEMBL ↔ ENTREZID
+    ↓
+[R] GO_enrichment_analysis() → functional interpretation
+```
+
+## Key Design Decisions
+
+### Why R + Python?
+
+- **R**: Rich bioinformatics infrastructure (clusterProfiler, org.db packages), flexible visualization (ggplot2)
+- **Python**: Mature ML ecosystem (scikit-learn), efficient numerical computing
+
+The `reticulate` package bridges the two environments with minimal overhead.
+
+### Why S4 Classes?
+
+S4 provides:
+
+- Formal slot definitions with type checking
+- Method dispatch for generic functions
+- Clear contracts for data structures
+
+The `PipelineResults` class ensures all pipeline outputs adhere to a consistent schema.
+
+### Why Multiple Feature Selection Methods?
+
+Different algorithms capture different aspects of feature relevance:
+
+- **LASSO**: Linear dependencies via L1 regularization
+- **Random Forest**: Non-linear interactions via tree-based importance
+- **Univariate**: Marginal associations (fast, interpretable)
+- **Boruta**: All-relevant features via shadow features
+
+Ensemble approaches often yield more robust signatures than single methods.
+
+## Reading Guide
+
+Subsequent chapters follow the typical GeneSelectR workflow:
+
+1. **Setup** (Ch 2): Environment configuration with `uv` and `reticulate`
+2. **Core** (Ch 3-5): Class definitions, Python integration, pipeline mechanics
+3. **Analysis** (Ch 6-9): Metrics, importance, overlap, and enrichment
+4. **Demo** (Ch 10): End-to-end reproducible example
+5. **Synthesis** (Ch 11): Design reflections and extensions
+
+Each chapter is self-contained with executable code chunks using test fixtures to ensure fast rendering.
+
+## Entry Points for Code Exploration
+
+- **Start here**: `R/GeneSelectR.R` (main workflow functions)
+- **Data structures**: `R/classes.R` (S4 definitions)
+- **Python interface**: `inst/python/GeneSelectR.py` (core ML logic)
+- **Example usage**: `tests/testthat/test-*.R` (unit tests as usage examples)
+
+---
+
+**Next**: [Environment Setup with uv and reticulate](02_setup_uv_reticulate.qmd)

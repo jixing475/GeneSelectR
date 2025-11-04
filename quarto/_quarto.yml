@@ -1,0 +1,46 @@
+project:
+  type: website
+  output-dir: _site
+
+# GitHub Pages configuration
+# The site will be published to https://<username>.github.io/<repo-name>/
+
+website:
+  title: "GeneSelectR: A Literate Tour"
+  navbar:
+    left:
+      - text: Overview
+        href: 01_overview.qmd
+      - text: Setup
+        href: 02_setup_uv_reticulate.qmd
+      - text: Core
+        menu:
+          - 03_core_classes.qmd
+          - 04_python_integration.qmd
+          - 05_feature_selection_and_search.qmd
+      - text: Analysis
+        menu:
+          - 06_metrics_and_visualization.qmd
+          - 07_feature_importance.qmd
+          - 08_overlap_and_stability.qmd
+          - 09_go_enrichment.qmd
+      - text: Demo
+        href: 10_end_to_end_demo.qmd
+      - text: Synthesis
+        href: 11_synthesis.qmd
+
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-overflow: wrap
+    theme: cosmo
+    keep-md: true
+
+execute:
+  cache: true
+  freeze: auto
+  warning: false
+  message: false
+
+bibliography: references.bib

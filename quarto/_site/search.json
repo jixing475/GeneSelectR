@@ -1,0 +1,744 @@
+[
+  {
+    "objectID": "01_overview.html",
+    "href": "01_overview.html",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "",
+    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
+  },
+  {
+    "objectID": "01_overview.html#what-geneselectr-solves",
+    "href": "01_overview.html#what-geneselectr-solves",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "",
+    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
+  },
+  {
+    "objectID": "01_overview.html#architecture-overview",
+    "href": "01_overview.html#architecture-overview",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "2 Architecture Overview",
+    "text": "2 Architecture Overview\n\n2.1 R Components (R/)\nThe R layer provides:\n\nCore workflow orchestration (GeneSelectR.R):\n\ndefine_sklearn_modules(): Bridge to Python ML modules\nset_default_fs_methods(): Configure feature selection methods\ncreate_pipelines(): Build scikit-learn pipelines via reticulate\nperform_grid_search(): Execute hyperparameter optimization\n\nS4 class system (classes.R):\n\nPipelineResults: Container for CV results, feature importances, metrics\nGeneList: Gene identifiers (SYMBOL, ENSEMBL, ENTREZID)\nAnnotatedGeneLists: Collection of gene lists per method\n\nEvaluation and visualization:\n\ncalculate_mean_cv_scores(), evaluate_test_metrics(): Performance metrics\nplot_metrics(), plot_feature_importance(): Diagnostic plots\ncalculate_overlap_coefficients(), plot_overlap_heatmaps(): Gene set comparison\n\nBioinformatics integration:\n\nGO_enrichment_analysis(): clusterProfiler-based enrichment\nrun_simplify_enrichment(), run_multiple_simplifyGO(): GO term simplification\nannotate_gene_lists(): Convert symbols to IDs\n\n\n\n\n2.2 Python Components (inst/python/)\nPython modules handle computationally intensive tasks:\n\nGeneSelectR.py: Core pipeline execution\n\nGrid search with cross-validation\nFeature importance calculation\nModel training and evaluation\n\nfit_and_evaluate_pipelines.py: Test set evaluation\n\nOut-of-sample performance metrics\nStandardized scoring across methods\n\ngeneset_stability.py: Stability analysis\n\nFeature selection across bootstrap samples\nJaccard index for gene set overlap\n\ncorrelation_filter.py: Preprocessing utilities\n\nRedundancy removal via correlation thresholding"
+  },
+  {
+    "objectID": "01_overview.html#data-flow",
+    "href": "01_overview.html#data-flow",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "3 Data Flow",
+    "text": "3 Data Flow\nInput Data (expression matrix + labels)\n    ↓\n[R] create_pipelines() → build sklearn Pipeline objects\n    ↓\n[Python] perform_grid_search() → hyperparameter optimization\n    ↓\n[R] PipelineResults object ← extract results via reticulate\n    ↓\n[R] get_feature_importances() → extract top genes\n    ↓\n[R] annotate_gene_lists() → map SYMBOL ↔ ENSEMBL ↔ ENTREZID\n    ↓\n[R] GO_enrichment_analysis() → functional interpretation"
+  },
+  {
+    "objectID": "01_overview.html#key-design-decisions",
+    "href": "01_overview.html#key-design-decisions",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "4 Key Design Decisions",
+    "text": "4 Key Design Decisions\n\n4.1 Why R + Python?\n\nR: Rich bioinformatics infrastructure (clusterProfiler, org.db packages), flexible visualization (ggplot2)\nPython: Mature ML ecosystem (scikit-learn), efficient numerical computing\n\nThe reticulate package bridges the two environments with minimal overhead.\n\n\n4.2 Why S4 Classes?\nS4 provides:\n\nFormal slot definitions with type checking\nMethod dispatch for generic functions\nClear contracts for data structures\n\nThe PipelineResults class ensures all pipeline outputs adhere to a consistent schema.\n\n\n4.3 Why Multiple Feature Selection Methods?\nDifferent algorithms capture different aspects of feature relevance:\n\nLASSO: Linear dependencies via L1 regularization\nRandom Forest: Non-linear interactions via tree-based importance\nUnivariate: Marginal associations (fast, interpretable)\nBoruta: All-relevant features via shadow features\n\nEnsemble approaches often yield more robust signatures than single methods."
+  },
+  {
+    "objectID": "01_overview.html#reading-guide",
+    "href": "01_overview.html#reading-guide",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "5 Reading Guide",
+    "text": "5 Reading Guide\nSubsequent chapters follow the typical GeneSelectR workflow:\n\nSetup (Ch 2): Environment configuration with uv and reticulate\nCore (Ch 3-5): Class definitions, Python integration, pipeline mechanics\nAnalysis (Ch 6-9): Metrics, importance, overlap, and enrichment\nDemo (Ch 10): End-to-end reproducible example\nSynthesis (Ch 11): Design reflections and extensions\n\nEach chapter is self-contained with executable code chunks using test fixtures to ensure fast rendering."
+  },
+  {
+    "objectID": "01_overview.html#entry-points-for-code-exploration",
+    "href": "01_overview.html#entry-points-for-code-exploration",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "6 Entry Points for Code Exploration",
+    "text": "6 Entry Points for Code Exploration\n\nStart here: R/GeneSelectR.R (main workflow functions)\nData structures: R/classes.R (S4 definitions)\nPython interface: inst/python/GeneSelectR.py (core ML logic)\nExample usage: tests/testthat/test-*.R (unit tests as usage examples)\n\n\nNext: Environment Setup with uv and reticulate"
+  },
+  {
+    "objectID": "07_feature_importance.html",
+    "href": "07_feature_importance.html",
+    "title": "Feature Importance Estimation",
+    "section": "",
+    "text": "GeneSelectR extracts feature importance via two approaches:\n\nInbuilt (model-based): Importance scores from the ML algorithm itself\n\nFast (no extra computation)\nMethod-specific (e.g., Gini importance for Random Forest)\nMay be biased by feature correlations\n\nPermutation-based: Importance via feature shuffling\n\nSlower (requires retraining)\nModel-agnostic (works for any algorithm)\nMore robust to correlated features\n\n\nBoth are stored in the PipelineResults object after grid search."
+  },
+  {
+    "objectID": "07_feature_importance.html#two-flavors-of-importance",
+    "href": "07_feature_importance.html#two-flavors-of-importance",
+    "title": "Feature Importance Estimation",
+    "section": "",
+    "text": "GeneSelectR extracts feature importance via two approaches:\n\nInbuilt (model-based): Importance scores from the ML algorithm itself\n\nFast (no extra computation)\nMethod-specific (e.g., Gini importance for Random Forest)\nMay be biased by feature correlations\n\nPermutation-based: Importance via feature shuffling\n\nSlower (requires retraining)\nModel-agnostic (works for any algorithm)\nMore robust to correlated features\n\n\nBoth are stored in the PipelineResults object after grid search."
+  },
+  {
+    "objectID": "07_feature_importance.html#inbuilt-feature-importance",
+    "href": "07_feature_importance.html#inbuilt-feature-importance",
+    "title": "Feature Importance Estimation",
+    "section": "2 Inbuilt Feature Importance",
+    "text": "2 Inbuilt Feature Importance\n\n2.1 Extraction from Models\nAfter training, scikit-learn models expose importance via:\n\nTree-based (Random Forest, Gradient Boosting): feature_importances_ attribute\nLinear models (LASSO): Absolute coefficient values\nUnivariate: Statistical test scores\nBoruta: Binary support mask\n\nGeneSelectR normalizes these to a common scale (sum to 1).\n\n\n2.2 Accessing Inbuilt Importances\n\nsuppressPackageStartupMessages({\n  library(dplyr)\n  library(ggplot2)\n})\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nresults &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/PipelineResults.rds\"))\n\nRaw importances (named numeric vectors):\n\n# Example: Lasso importances\nlasso_imp &lt;- results@inbuilt_feature_importance$Lasso\n\n# Check if it's a vector or data.frame\nif (is.data.frame(lasso_imp) || is.list(lasso_imp)) {\n  cat(\"Lasso importance structure:\\n\")\n  str(lasso_imp, max.level = 1)\n} else {\n  # It's a vector, can sort directly\n  head(sort(lasso_imp, decreasing = TRUE), 10)\n}\n\nLasso importance structure:\ntibble [33 × 8] (S3: tbl_df/tbl/data.frame)\n\n\nHigher values indicate greater importance for classification.\n\n\n2.3 Aggregation Across CV Folds\nget_feature_importances() averages importances across CV splits:\n\ntop_features &lt;- get_feature_importances(\n  results,\n  method = \"Lasso\",\n  importance_type = \"inbuilt\",\n  top_n = 50  # Return top 50 features\n)\n\nhead(top_features)\n\nOutput is a data.frame with columns feature, importance, rank."
+  },
+  {
+    "objectID": "07_feature_importance.html#permutation-feature-importance",
+    "href": "07_feature_importance.html#permutation-feature-importance",
+    "title": "Feature Importance Estimation",
+    "section": "3 Permutation Feature Importance",
+    "text": "3 Permutation Feature Importance\n\n3.1 Concept\nPermutation importance measures the drop in model performance when a feature is randomly shuffled:\n\nCompute baseline score on validation set\nPermute feature i (break feature-target relationship)\nRe-compute score\nImportance = baseline - permuted score\n\nFeatures causing large drops are important; features causing no change are irrelevant.\n\n\n3.2 Advantages Over Inbuilt\n\nModel-agnostic: Works for any classifier\nCorrelation-aware: Doesn’t inflate correlated features\nInterpretable: Directly tied to predictive performance\n\n\n\n3.3 Computational Cost\nPermutation importance requires:\n\nOne prediction per feature per permutation (default: 10 permutations)\nFor 1000 features: 10,000 predictions\n\nStill faster than retraining, but slower than inbuilt.\n\n\n3.4 Accessing Permutation Importances\n\n# Check if permutation importances were computed\nif (length(results@permutation_importance) &gt; 0) {\n  lasso_perm &lt;- results@permutation_importance$Lasso\n  head(lasso_perm)\n} else {\n  cat(\"Permutation importance not computed (set calculate_permutation_importance = TRUE)\\n\")\n}\n\n# A tibble: 6 × 8\n  feature          mean_importance     std rank_Lasso_split_1 rank_Lasso_split_2\n  &lt;chr&gt;                      &lt;dbl&gt;   &lt;dbl&gt;              &lt;int&gt;              &lt;int&gt;\n1 ENSG00000071539         0.000656 1.47e-3                  1               1121\n2 ENSG00000134690         0.00197  4.40e-3               6480                  3\n3 ENSG00000171848         0.00164  3.67e-3              12042                  5\n4 ENSG00000175305         0.000328 7.33e-4              12611                  7\n5 ENSG00000186193…        0.000984 2.20e-3              14309                  6\n6 ENSG00000287914…        0.00230  1.27e-2              25858                  1\n# ℹ 3 more variables: rank_Lasso_split_3 &lt;int&gt;, rank_Lasso_split_4 &lt;int&gt;,\n#   rank_Lasso_split_5 &lt;int&gt;\n\n\nColumns:\n\nfeature: Feature name\nimportance_mean: Mean importance across permutations\nimportance_std: Standard deviation across permutations"
+  },
+  {
+    "objectID": "07_feature_importance.html#visualization",
+    "href": "07_feature_importance.html#visualization",
+    "title": "Feature Importance Estimation",
+    "section": "4 Visualization",
+    "text": "4 Visualization\n\n4.1 Bar Plots\n\nlibrary(GeneSelectR)\n\nplot_feature_importance(\n  results,\n  method = \"Lasso\",\n  importance_type = \"inbuilt\",\n  top_n = 20,\n  color = \"steelblue\"\n)\n\nExpected output: Horizontal bar plot of top 20 features.\n\n\n4.2 Comparing Inbuilt vs Permutation\n\n# Inbuilt\np1 &lt;- plot_feature_importance(results, \"Lasso\", \"inbuilt\", top_n = 15)\n\n# Permutation\np2 &lt;- plot_feature_importance(results, \"Lasso\", \"permutation\", top_n = 15)\n\n# Side-by-side\nlibrary(patchwork)\np1 + p2 + plot_layout(ncol = 2)\n\nObservation: Inbuilt and permutation rankings often differ. Permutation may downrank correlated features.\n\n\n4.3 Heatmap Across Methods\n\n# Extract top 20 features per method\nimportance_matrix &lt;- sapply(names(results@inbuilt_feature_importance), function(method) {\n  imp &lt;- results@inbuilt_feature_importance[[method]]\n  top_features &lt;- names(sort(imp, decreasing = TRUE)[1:20])\n  imp[top_features]\n})\n\n# Heatmap\npheatmap::pheatmap(\n  importance_matrix,\n  cluster_rows = TRUE,\n  cluster_cols = FALSE,\n  main = \"Feature Importance Across Methods\"\n)\n\nReveals method-specific preferences (e.g., LASSO favors different genes than Random Forest)."
+  },
+  {
+    "objectID": "07_feature_importance.html#feature-selection-strategies",
+    "href": "07_feature_importance.html#feature-selection-strategies",
+    "title": "Feature Importance Estimation",
+    "section": "5 Feature Selection Strategies",
+    "text": "5 Feature Selection Strategies\n\n5.1 Top-N Selection\nSelect the N most important features:\n\ntop_genes &lt;- names(sort(lasso_imp, decreasing = TRUE)[1:50])\n\nPro: Simple, interpretable\nCon: Arbitrary threshold; may miss weakly important features\n\n\n5.2 Threshold-Based\nSelect features above an importance threshold:\n\n# Keep features with importance &gt; 1% of max\nthreshold &lt;- 0.01 * max(lasso_imp)\nselected &lt;- names(lasso_imp[lasso_imp &gt; threshold])\n\nPro: Adaptive to importance distribution\nCon: Threshold choice is subjective\n\n\n5.3 Cumulative Importance\nSelect features capturing X% of total importance:\n\nsorted_imp &lt;- sort(lasso_imp, decreasing = TRUE)\ncumsum_imp &lt;- cumsum(sorted_imp) / sum(sorted_imp)\nselected &lt;- names(sorted_imp[cumsum_imp &lt;= 0.90])  # Top 90%\n\nPro: Ensures coverage of importance signal\nCon: May select many features in flat distributions"
+  },
+  {
+    "objectID": "07_feature_importance.html#design-decisions",
+    "href": "07_feature_importance.html#design-decisions",
+    "title": "Feature Importance Estimation",
+    "section": "6 Design Decisions",
+    "text": "6 Design Decisions\n\n6.1 Why Both Inbuilt and Permutation?\n\nInbuilt: Fast screening for initial exploration\nPermutation: Validation of inbuilt rankings; less biased\n\nDiscrepancies between the two warrant investigation (e.g., multicollinearity).\n\n\n6.2 Why Normalize Importances?\nRaw importances have method-specific scales:\n\nRandom Forest: Sum of Gini decreases\nLASSO: Absolute coefficient values\n\nNormalization to [0, 1] allows cross-method comparison.\n\n\n6.3 Why Average Across CV Folds?\nFeature importance can vary across folds due to:\n\nDifferent training samples\nDifferent hyperparameters (in nested CV)\n\nAveraging stabilizes rankings."
+  },
+  {
+    "objectID": "07_feature_importance.html#troubleshooting",
+    "href": "07_feature_importance.html#troubleshooting",
+    "title": "Feature Importance Estimation",
+    "section": "7 Troubleshooting",
+    "text": "7 Troubleshooting\n\n7.1 “All importances are zero”\nFor LASSO, this happens when regularization is too strong:\n\n# Check C parameter (lower = more regularization)\nresults@best_pipeline$params$feature_selector__estimator__C\n\n# Solution: Increase C in param_grids\nparam_grids$Lasso$feature_selector__estimator__C &lt;- c(1, 10, 100)\n\n\n\n7.2 “Importances don’t match selected features”\nFeature selection happens during grid search; importances are extracted post-hoc. They may not align if:\n\nThreshold applied during selection\nDifferent hyperparameters between selection and importance extraction\n\nAlways cross-check with the actual selected features."
+  },
+  {
+    "objectID": "07_feature_importance.html#example-workflow",
+    "href": "07_feature_importance.html#example-workflow",
+    "title": "Feature Importance Estimation",
+    "section": "8 Example Workflow",
+    "text": "8 Example Workflow\n\n# 1. Run grid search with permutation importance\nresults &lt;- perform_grid_search(\n  X, y,\n  calculate_permutation_importance = TRUE,\n  ...\n)\n\n# 2. Extract top features (inbuilt)\ntop_inbuilt &lt;- get_feature_importances(results, \"Lasso\", \"inbuilt\", top_n = 50)\n\n# 3. Extract top features (permutation)\ntop_perm &lt;- get_feature_importances(results, \"Lasso\", \"permutation\", top_n = 50)\n\n# 4. Compare overlaps\nlength(intersect(top_inbuilt$feature, top_perm$feature))  # How many in common?\n\n# 5. Visualize\nplot_feature_importance(results, \"Lasso\", \"permutation\", top_n = 20)\n\n# 6. Annotate for GO analysis\nannotated &lt;- annotate_gene_lists(\n  top_perm$feature,\n  species = \"Homo.sapiens\",\n  keytype = \"ENSEMBL\"\n)"
+  },
+  {
+    "objectID": "07_feature_importance.html#summary",
+    "href": "07_feature_importance.html#summary",
+    "title": "Feature Importance Estimation",
+    "section": "9 Summary",
+    "text": "9 Summary\nGeneSelectR’s importance framework:\n\nExtracts inbuilt importances from ML models (fast)\nComputes permutation importances for robustness (slower)\nAggregates across CV folds for stability\nVisualizes via bar plots and heatmaps\n\nThe next chapter examines gene set overlap and stability.\n\nNext: Overlap and Stability Analysis"
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html",
+    "href": "05_feature_selection_and_search.html",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "",
+    "text": "GeneSelectR uses scikit-learn’s Pipeline abstraction to chain:\n\nPreprocessing: Variance thresholding, standardization\nFeature selection: LASSO, Random Forest, Univariate, Boruta\nClassification: Gradient Boosting (for metric evaluation)\n\nEach component is a transformer or estimator with .fit() and .transform() or .predict() methods.\n\n\nPipeline([\n  ('variance', VarianceThreshold(threshold=0.85)),\n  ('scaler', StandardScaler()),\n  ('feature_selector', SelectFromModel(RandomForestClassifier())),\n  ('classifier', GradientBoostingClassifier())\n])\nDuring .fit(), data flows sequentially:\nRaw features → VarianceThreshold → StandardScaler → Feature selector → Classifier"
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html#pipeline-architecture",
+    "href": "05_feature_selection_and_search.html#pipeline-architecture",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "",
+    "text": "GeneSelectR uses scikit-learn’s Pipeline abstraction to chain:\n\nPreprocessing: Variance thresholding, standardization\nFeature selection: LASSO, Random Forest, Univariate, Boruta\nClassification: Gradient Boosting (for metric evaluation)\n\nEach component is a transformer or estimator with .fit() and .transform() or .predict() methods.\n\n\nPipeline([\n  ('variance', VarianceThreshold(threshold=0.85)),\n  ('scaler', StandardScaler()),\n  ('feature_selector', SelectFromModel(RandomForestClassifier())),\n  ('classifier', GradientBoostingClassifier())\n])\nDuring .fit(), data flows sequentially:\nRaw features → VarianceThreshold → StandardScaler → Feature selector → Classifier"
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html#feature-selection-methods",
+    "href": "05_feature_selection_and_search.html#feature-selection-methods",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "2 Feature Selection Methods",
+    "text": "2 Feature Selection Methods\nGeneSelectR supports four methods by default:\n\n2.1 1. LASSO (L1 Regularization)\nLogistic regression with L1 penalty drives irrelevant coefficients to zero.\nHyperparameters:\n\nC: Inverse regularization strength (smaller = more regularization)\nsolver: Optimization algorithm (liblinear, saga)\n\nWhen to use: Linear relationships, high interpretability\nLimitations: Assumes linearity; may miss non-linear patterns\n\n\n2.2 2. Random Forest Importance\nTree-based importance via mean decrease in impurity (Gini importance).\nHyperparameters:\n\nn_estimators: Number of trees (more = better but slower)\nthreshold: Importance cutoff (median, mean, or numeric)\n\nWhen to use: Non-linear relationships, feature interactions\nLimitations: Biased toward high-cardinality features; can overfit\n\n\n2.3 3. Univariate Selection\nStatistical tests (e.g., ANOVA F-test) for each feature vs. target.\nHyperparameters:\n\nparam: Number of top features to keep\n\nWhen to use: Fast screening, high-dimensional data\nLimitations: Ignores feature interactions; univariate only\n\n\n2.4 4. Boruta\nIterative algorithm comparing original features to “shadow” features (permuted).\nHyperparameters:\n\nn_estimators: Trees per iteration\nperc: Percentile for importance comparison\n\nWhen to use: All-relevant features (not just predictive)\nLimitations: Slow; may select many features"
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html#hyperparameter-grid-search",
+    "href": "05_feature_selection_and_search.html#hyperparameter-grid-search",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "3 Hyperparameter Grid Search",
+    "text": "3 Hyperparameter Grid Search\n\n3.1 Grid Definition\nset_default_param_grids() defines search spaces:\n\nfs_param_grids &lt;- list(\n  \"Lasso\" = list(\n    \"feature_selector__estimator__C\" = c(0.01, 0.1, 1, 10),\n    \"feature_selector__estimator__solver\" = c(\"liblinear\", \"saga\")\n  ),\n  \"Univariate\" = list(\n    \"feature_selector__param\" = seq(10, max_features, by = step_size)\n  ),\n  \"RandomForest\" = list(\n    \"feature_selector__estimator__n_estimators\" = c(50L, 100L, 200L)\n  ),\n  \"boruta\" = list()  # No tunable hyperparameters in this implementation\n)\n\nParameter naming: &lt;step_name&gt;__&lt;param_name&gt; (double underscore for nested access).\n\n\n3.2 Search Strategy\nGeneSelectR uses GridSearchCV (exhaustive search):\n\nAll combinations of hyperparameters tested\nCross-validation score computed per combination\nBest combination selected per method\n\nAlternative: RandomizedSearchCV for faster (but approximate) search.\n\n\n3.3 Cross-Validation\n5-fold stratified CV by default:\n\n# Data split into 5 folds\n# Each fold used once as validation, 4 times as training\n# Average performance across folds = CV score\n\nFold 1: [Train][Train][Train][Train][Val]\nFold 2: [Train][Train][Train][Val][Train]\nFold 3: [Train][Train][Val][Train][Train]\nFold 4: [Train][Val][Train][Train][Train]\nFold 5: [Val][Train][Train][Train][Train]\n\nStratified: Class proportions preserved in each fold (critical for imbalanced datasets)."
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html#workflow-example",
+    "href": "05_feature_selection_and_search.html#workflow-example",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "4 Workflow Example",
+    "text": "4 Workflow Example\n\n4.1 Step 1: Define Modules\n\nlibrary(GeneSelectR)\n\n# Import Python sklearn components\nmodules &lt;- define_sklearn_modules()\n\n\n\n4.2 Step 2: Configure Feature Selection\n\nmax_features &lt;- 100  # Maximum genes to select\n\n# Get preprocessing steps and default methods\nfs_setup &lt;- set_default_fs_methods(modules, max_features, random_state = 42)\n\npreprocessing_steps &lt;- fs_setup$preprocessing_steps\nfs_methods &lt;- fs_setup$default_feature_selection_methods\n\n\n\n4.3 Step 3: Create Pipelines\n\nclassifier &lt;- modules$GradBoost(random_state = 42)\n\npipelines &lt;- create_pipelines(\n  preprocessing_steps = preprocessing_steps,\n  fs_methods = fs_methods,\n  classifier = classifier,\n  modules = modules\n)\n\n# pipelines is a list of Pipeline objects, one per method\nnames(pipelines)  # \"Lasso\", \"Univariate\", \"RandomForest\", \"boruta\"\n\n\n\n4.4 Step 4: Define Parameter Grids\n\nparam_grids &lt;- set_default_param_grids(max_features)\n\n\n\n4.5 Step 5: Execute Grid Search (Lightweight Example)\nTo keep runtime low, we’ll use a small fixture:\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nfixture_path &lt;- file.path(project_root, \"tests/testthat/fixtures/UrbanRandomSubset.rda\")\n\nload(fixture_path)  # Loads 'UrbanRandomSubset' data.frame\n\n# Extract data (first column is treatment/group, rest are features)\ny &lt;- UrbanRandomSubset[, 1]\nX &lt;- as.matrix(UrbanRandomSubset[, -1])\n\n# Convert character matrix to numeric\nfor(i in 1:ncol(X)) {\n  X[, i] &lt;- as.numeric(X[, i])\n}\n\ncat(\"Data dimensions:\", dim(X), \"\\n\")\n\nData dimensions: 60 1000 \n\ncat(\"Classes:\", table(y), \"\\n\")\n\nClasses: 31 29 \n\n\nRun grid search (set eval=FALSE for full dataset):\n\nresults &lt;- perform_grid_search(\n  pipelines = pipelines,\n  param_grids = param_grids,\n  X = X,\n  y = y,\n  cv = 3,  # Reduced for speed\n  scoring = \"f1_weighted\",\n  random_state = 42,\n  calculate_permutation_importance = FALSE,\n  n_jobs = 2  # Use fewer cores for demo\n)\n\n# results is a PipelineResults object\nclass(results)\n\n\n\n4.6 Step 6: Inspect Results\n\n# Best method and score\nbest &lt;- results@best_pipeline\ncat(\"Best method:\", best$method, \"\\n\")\ncat(\"Best score:\", best$score, \"\\n\")\n\n# Compare methods\nhead(results@cv_mean_score)\n\n# Top features for each method\nlapply(results@inbuilt_feature_importance, function(x) head(names(x), 10))"
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html#design-rationale",
+    "href": "05_feature_selection_and_search.html#design-rationale",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "5 Design Rationale",
+    "text": "5 Design Rationale\n\n5.1 Why Grid Search Over Bayesian Optimization?\nGrid search is:\n\nDeterministic: Same results every run (given fixed seed)\nParallelizable: Independent evaluations\nSimple: No surrogate model hyperparameters\n\nBayesian optimization (via scikit-optimize) is available but adds complexity.\n\n\n5.2 Why Stratified CV?\nGene expression datasets often have:\n\nSmall sample sizes (n &lt; 100)\nImbalanced classes (e.g., 70% control, 30% disease)\n\nStratification ensures each fold is representative.\n\n\n5.3 Why Gradient Boosting for Classification?\nGradientBoostingClassifier is:\n\nRobust: Handles high-dimensional data well\nAccurate: Often outperforms simpler models\nFast enough: For the small feature subsets post-selection\n\nBut the choice is modular—users can substitute other classifiers."
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html#performance-tips",
+    "href": "05_feature_selection_and_search.html#performance-tips",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "6 Performance Tips",
+    "text": "6 Performance Tips\n\n6.1 Reduce Search Space\nFor faster iteration:\n\nquick_grid &lt;- list(\n  \"Lasso\" = list(\n    \"feature_selector__estimator__C\" = c(0.1, 1)  # Only 2 values instead of 4\n  )\n)\n\n\n\n6.2 Parallelize Across Methods\nRun each method’s grid search separately:\n\nlibrary(parallel)\n\ncl &lt;- makeCluster(detectCores() - 1)\nresults_list &lt;- parLapply(cl, names(pipelines), function(method_name) {\n  # Run grid search for single method\n  ...\n})\nstopCluster(cl)\n\n\n\n6.3 Cache Results\nUse Quarto’s caching:\n::: {.cell}\n\n```{.r .cell-code}\nresults &lt;- perform_grid_search(...)\n```\n:::\nResults persist across renders unless code changes."
+  },
+  {
+    "objectID": "05_feature_selection_and_search.html#summary",
+    "href": "05_feature_selection_and_search.html#summary",
+    "title": "Feature Selection and Hyperparameter Search",
+    "section": "7 Summary",
+    "text": "7 Summary\nGeneSelectR’s pipeline approach:\n\nStandardizes ML workflows via scikit-learn Pipelines\nCompares multiple feature selection methods systematically\nOptimizes hyperparameters via cross-validation\nOutputs structured results in PipelineResults objects\n\nThe next chapter explores how to visualize and interpret these results.\n\nNext: Metrics and Visualization"
+  },
+  {
+    "objectID": "11_synthesis.html",
+    "href": "11_synthesis.html",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "",
+    "text": "GeneSelectR implements a hybrid R-Python architecture for feature selection in genomic data:\n\n\n\nR Layer (R/)\n\nS4 classes for type-safe data structures\nWorkflow orchestration and API\nBioconductor integration (GO enrichment, annotation)\nVisualization via ggplot2\n\nPython Layer (inst/python/)\n\nscikit-learn pipelines for ML\nEfficient grid search and cross-validation\nFeature importance computation\nStability analysis algorithms\n\nBridge (reticulate)\n\nBidirectional data conversion\nSeamless function calls across languages\nUnified error handling\n\n\nThis design leverages the strengths of both ecosystems while minimizing their weaknesses."
+  },
+  {
+    "objectID": "11_synthesis.html#architecture-recap",
+    "href": "11_synthesis.html#architecture-recap",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "",
+    "text": "GeneSelectR implements a hybrid R-Python architecture for feature selection in genomic data:\n\n\n\nR Layer (R/)\n\nS4 classes for type-safe data structures\nWorkflow orchestration and API\nBioconductor integration (GO enrichment, annotation)\nVisualization via ggplot2\n\nPython Layer (inst/python/)\n\nscikit-learn pipelines for ML\nEfficient grid search and cross-validation\nFeature importance computation\nStability analysis algorithms\n\nBridge (reticulate)\n\nBidirectional data conversion\nSeamless function calls across languages\nUnified error handling\n\n\nThis design leverages the strengths of both ecosystems while minimizing their weaknesses."
+  },
+  {
+    "objectID": "11_synthesis.html#design-principles",
+    "href": "11_synthesis.html#design-principles",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "2 Design Principles",
+    "text": "2 Design Principles\n\n2.1 1. Modularity\nEach component is loosely coupled:\n\nFeature selection methods are pluggable (add new algorithms without changing core code)\nClassifiers are interchangeable (swap Gradient Boosting for SVM)\nEnrichment backends are swappable (use KEGG instead of GO)\n\nExample: Adding a new feature selector:\n# Define new method\nmy_selector &lt;- sklearn$feature_selection$RFE(estimator = svm)\n\n# Add to methods list\nfs_methods$RFE &lt;- my_selector\n\n# Create pipelines (no other code changes needed)\npipelines &lt;- create_pipelines(preprocessing_steps, fs_methods, classifier, modules)\n\n\n2.2 2. Reproducibility\nMultiple mechanisms ensure reproducible results:\n\nFixed random seeds: Control stochastic algorithms\nQuarto caching: Preserve computation results\nVersion pinning: requirements.txt locks Python dependencies\nFreeze mode: freeze: auto prevents unexpected re-renders\n\nWorkflow:\n# Capture exact environment\nuv pip freeze &gt; requirements.lock\n\n# Reproduce later\nuv venv .venv\nuv pip install -r requirements.lock\n\n\n2.3 3. Transparency\nResults are inspectable at every stage:\n\nRaw CV results accessible via @cv_results slot\nAll hyperparameters logged in @best_pipeline\nFeature importances preserved, not just selected genes\nGO enrichment includes gene-term mappings\n\nPhilosophy: Users should be able to audit any decision the package makes.\n\n\n2.4 4. Pragmatism\nDesign choices prioritize practical utility over theoretical purity:\n\nS4 instead of R7: Mature ecosystem, despite verbosity\nGrid search instead of Bayesian: Simpler, deterministic\nMultiple metrics: Avoid single-metric bias\n\nTrade-off: Some flexibility sacrificed for usability."
+  },
+  {
+    "objectID": "11_synthesis.html#key-trade-offs",
+    "href": "11_synthesis.html#key-trade-offs",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "3 Key Trade-offs",
+    "text": "3 Key Trade-offs\n\n3.1 R + Python vs Pure R\n\n\n\n\n\n\n\n\nAspect\nHybrid (GeneSelectR)\nPure R\n\n\n\n\nML Performance\n⭐⭐⭐⭐⭐ (sklearn)\n⭐⭐⭐ (caret/tidymodels)\n\n\nBioinformatics\n⭐⭐⭐⭐⭐ (Bioconductor)\n⭐⭐⭐⭐⭐ (Bioconductor)\n\n\nSetup Complexity\n⭐⭐⭐ (need Python)\n⭐⭐⭐⭐⭐ (R-only)\n\n\nDebugging\n⭐⭐⭐ (cross-language)\n⭐⭐⭐⭐ (single language)\n\n\n\nVerdict: Hybrid approach justified by superior ML capabilities.\n\n\n3.2 S4 vs S3\n\n\n\nAspect\nS4 (GeneSelectR)\nS3\n\n\n\n\nType Safety\n⭐⭐⭐⭐⭐\n⭐⭐\n\n\nEase of Use\n⭐⭐⭐\n⭐⭐⭐⭐⭐\n\n\nMethod Dispatch\n⭐⭐⭐⭐⭐\n⭐⭐⭐⭐\n\n\nBioc Integration\n⭐⭐⭐⭐⭐\n⭐⭐⭐\n\n\n\nVerdict: S4’s formalism benefits complex data structures.\n\n\n3.3 Grid Search vs Bayesian Optimization\n\n\n\nAspect\nGrid (GeneSelectR)\nBayesian\n\n\n\n\nReproducibility\n⭐⭐⭐⭐⭐\n⭐⭐⭐\n\n\nEfficiency\n⭐⭐⭐\n⭐⭐⭐⭐⭐\n\n\nSimplicity\n⭐⭐⭐⭐⭐\n⭐⭐⭐\n\n\nParallelism\n⭐⭐⭐⭐⭐ (trivial)\n⭐⭐⭐ (complex)\n\n\n\nVerdict: Grid search sufficient for GeneSelectR’s hyperparameter spaces."
+  },
+  {
+    "objectID": "11_synthesis.html#component-composition",
+    "href": "11_synthesis.html#component-composition",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "4 Component Composition",
+    "text": "4 Component Composition\n\n4.1 How It All Fits Together\nUser Input (X, y)\n    ↓\n[R] create_pipelines() → sklearn Pipeline objects\n    ↓\n[Python] Grid search with CV → cv_results_\n    ↓\n[R] PipelineResults object ← parse results\n    ↓\n[R] get_feature_importances() → extract top genes\n    ↓\n[R] annotate_gene_lists() → SYMBOL ↔ ENSEMBL ↔ ENTREZID\n    ↓\n[R] GO_enrichment_analysis() → clusterProfiler\n    ↓\n[R] Plots and reports → ggplot2\nEach stage is:\n\nTestable: Unit tests in tests/testthat/\nDocumented: Roxygen2 docs in man/\nCached: Quarto preserves intermediate results\n\n\n\n4.2 Extension Points\nUsers can customize at multiple levels:\n\nMethod level: Add new feature selectors\nPipeline level: Modify preprocessing steps\nScoring level: Change CV metrics\nEnrichment level: Use KEGG instead of GO\nVisualization level: Customize ggplot themes"
+  },
+  {
+    "objectID": "11_synthesis.html#limitations-and-future-directions",
+    "href": "11_synthesis.html#limitations-and-future-directions",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "5 Limitations and Future Directions",
+    "text": "5 Limitations and Future Directions\n\n5.1 Current Limitations\n\nSmall sample bias: Performance degrades with n &lt; 50\n\nMitigation: Use simpler methods (Univariate), stricter regularization\n\nAssumes independence: Features treated as independent in most methods\n\nMitigation: Correlation filtering (correlation_filter.py)\n\nBinary classification focus: Multi-class less tested\n\nFuture: Extend to multi-class and regression\n\nMemory constraints: Full data loaded into memory\n\nFuture: Streaming or chunking for large datasets\n\nNo ensemble selection: Methods evaluated separately\n\nFuture: Meta-learner combining multiple methods\n\n\n\n\n5.2 Potential Extensions\n\n5.2.1 1. Deep Learning Integration\nAdd neural network-based feature selection:\n# inst/python/deep_feature_selector.py\nfrom tensorflow.keras import Model, layers\n\ndef create_autoencoder_selector(input_dim, encoding_dim):\n    encoder = Model(...)\n    # Select features based on encoder weights\nChallenge: Interpretability vs. performance trade-off.\n\n\n5.2.2 2. Multi-Omics Support\nIntegrate genomics, transcriptomics, proteomics:\n# Conceptual API\nresults &lt;- perform_grid_search(\n  X = list(rna = X_rna, protein = X_protein),\n  y = y,\n  integration_strategy = \"late_fusion\"\n)\nChallenge: Handling different scales and dimensions.\n\n\n5.2.3 3. Causal Feature Selection\nIdentify causal features, not just predictive:\n\nIntegrate do-calculus frameworks\nUse instrumental variables\nImplement doubly robust estimators\n\nChallenge: Requires stronger assumptions (DAG structure).\n\n\n5.2.4 4. Interactive Shiny App\nWeb interface for non-programmers:\n# Launch app\nGeneSelectR::launch_app()\n\n# UI: Upload data → Select methods → View results\nBenefit: Broaden accessibility beyond R users.\n\n\n5.2.5 5. Cloud Deployment\nPackage workflows as containerized services:\n# Docker container\ndocker run geneselectr:latest --data data.csv --output results/\n\n# AWS Lambda deployment\naws lambda deploy --function geneselectr-api\nBenefit: Scalability for large-scale studies."
+  },
+  {
+    "objectID": "11_synthesis.html#lessons-learned",
+    "href": "11_synthesis.html#lessons-learned",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "6 Lessons Learned",
+    "text": "6 Lessons Learned\n\n6.1 What Worked\n\nHybrid architecture: R + Python synergy is powerful\nS4 classes: Type safety prevented many bugs\nFixtures for testing: Small data enables fast CI/CD\nQuarto caching: Drastically reduced doc render time\n\n\n\n6.2 What Could Improve\n\nPython environment management: uv helps, but initial setup still complex\nError messages: Cross-language stack traces are cryptic\nDocumentation: More real-world examples needed\nPerformance: Grid search is slow for large hyperparameter spaces"
+  },
+  {
+    "objectID": "11_synthesis.html#recommendations-for-users",
+    "href": "11_synthesis.html#recommendations-for-users",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "7 Recommendations for Users",
+    "text": "7 Recommendations for Users\n\n7.1 When to Use GeneSelectR\n✅ Good fit:\n\nGenomic classification problems (disease vs. control)\nNeed to compare multiple feature selection methods\nWant integrated GO enrichment\nHave moderate sample sizes (n &gt; 30)\n\n❌ Not ideal:\n\nRegression problems (package focused on classification)\nSingle-cell data (different preprocessing needed)\nReal-time applications (grid search is slow)\nExtremely high dimensions (m &gt; 100k, use pre-filtering)\n\n\n\n7.2 Best Practices\n\nStart small: Test on subsets before full runs\nValidate externally: Cross-dataset validation crucial\nCheck stability: Bootstrap resampling reveals robustness\nInterpret biologically: GO enrichment should make sense\nReport honestly: Include negative results (no enrichment = important finding)"
+  },
+  {
+    "objectID": "11_synthesis.html#philosophical-closing",
+    "href": "11_synthesis.html#philosophical-closing",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "8 Philosophical Closing",
+    "text": "8 Philosophical Closing\nGene expression analysis is both art and science:\n\nScience: Rigorous statistics, cross-validation, p-values\nArt: Choosing methods, interpreting biology, deciding thresholds\n\nGeneSelectR provides the tools, but judgment remains with the analyst. No algorithm can replace:\n\nDomain expertise (what biology is plausible?)\nCritical thinking (does this result make sense?)\nSkepticism (could this be a false positive?)\n\nFinal advice: Use GeneSelectR as a hypothesis generator, not a black box. Every selected gene is a candidate for follow-up, not a confirmed discovery."
+  },
+  {
+    "objectID": "11_synthesis.html#acknowledgments",
+    "href": "11_synthesis.html#acknowledgments",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "9 Acknowledgments",
+    "text": "9 Acknowledgments\nThis literate programming tour was inspired by:\n\nDonald Knuth’s literate programming philosophy\nHadley Wickham’s R package design principles\nBioconductor’s emphasis on reproducibility\nThe open-source community’s collaborative ethos"
+  },
+  {
+    "objectID": "11_synthesis.html#further-reading",
+    "href": "11_synthesis.html#further-reading",
+    "title": "Synthesis: Integration and Reflection",
+    "section": "10 Further Reading",
+    "text": "10 Further Reading\n\nscikit-learn documentation: scikit-learn.org\nclusterProfiler book: yulab-smu.top/biomedical-knowledge-mining-book\nFeature Engineering and Selection: Kuhn & Johnson (2019)\nThe Elements of Statistical Learning: Hastie et al. (2009)\n\n\nEnd of Tour\nThank you for exploring GeneSelectR’s design and implementation. We hope this narrative-first documentation provides clarity on both the what and the why behind the package.\nFor questions, issues, or contributions, visit the GitHub repository.\n\nNavigation: Return to Overview"
+  },
+  {
+    "objectID": "08_overlap_and_stability.html",
+    "href": "08_overlap_and_stability.html",
+    "title": "Overlap and Stability Analysis",
+    "section": "",
+    "text": "Different feature selection methods often produce different gene lists. This raises critical questions:\n\nAre the methods capturing the same biological signal? (High overlap)\nAre they discovering complementary patterns? (Low overlap, but both predictive)\nIs the signal robust or method-specific? (Stability analysis)\n\nGeneSelectR provides tools to quantify and visualize these relationships."
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#why-gene-set-overlap-matters",
+    "href": "08_overlap_and_stability.html#why-gene-set-overlap-matters",
+    "title": "Overlap and Stability Analysis",
+    "section": "",
+    "text": "Different feature selection methods often produce different gene lists. This raises critical questions:\n\nAre the methods capturing the same biological signal? (High overlap)\nAre they discovering complementary patterns? (Low overlap, but both predictive)\nIs the signal robust or method-specific? (Stability analysis)\n\nGeneSelectR provides tools to quantify and visualize these relationships."
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#overlap-coefficients",
+    "href": "08_overlap_and_stability.html#overlap-coefficients",
+    "title": "Overlap and Stability Analysis",
+    "section": "2 Overlap Coefficients",
+    "text": "2 Overlap Coefficients\n\n2.1 Jaccard Index\nMeasures set similarity:\n\\[\nJ(A, B) = \\frac{|A \\cap B|}{|A \\cup B|}\n\\]\n\nRange: [0, 1]\n0 = No overlap\n1 = Perfect overlap\n\nLimitation: Sensitive to set size. Two methods selecting 10 and 100 genes with 10 in common have J = 10/100 = 0.1.\n\n\n2.2 Overlap Coefficient (Szymkiewicz-Simpson)\n\\[\nO(A, B) = \\frac{|A \\cap B|}{\\min(|A|, |B|)}\n\\]\n\nRange: [0, 1]\nNormalizes by smaller set size\nAnswers: “What fraction of the smaller set is contained in the larger?”\n\n\n\n2.3 Example Calculation\n\nset_A &lt;- c(\"TP53\", \"EGFR\", \"BRCA1\", \"MYC\")\nset_B &lt;- c(\"TP53\", \"EGFR\", \"KRAS\")\n\n# Jaccard\nintersection &lt;- length(intersect(set_A, set_B))\nunion &lt;- length(union(set_A, set_B))\njaccard &lt;- intersection / union\ncat(\"Jaccard:\", jaccard, \"\\n\")\n\nJaccard: 0.4 \n\n# Overlap coefficient\nmin_size &lt;- min(length(set_A), length(set_B))\noverlap_coef &lt;- intersection / min_size\ncat(\"Overlap:\", overlap_coef, \"\\n\")\n\nOverlap: 0.6666667"
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#computing-overlap-matrices",
+    "href": "08_overlap_and_stability.html#computing-overlap-matrices",
+    "title": "Overlap and Stability Analysis",
+    "section": "3 Computing Overlap Matrices",
+    "text": "3 Computing Overlap Matrices\n\n3.1 Using calculate_overlap_coefficients()\n\nsuppressPackageStartupMessages({\n  library(dplyr)\n  library(ggplot2)\n})\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nannotated &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/AnnotatedGeneLists.rds\"))\n\nExtract gene symbols per method:\n\ngene_lists &lt;- lapply(annotated@inbuilt, function(gl) gl@SYMBOL)\nnames(gene_lists)\n\n[1] \"Lasso\"        \"Univariate\"   \"RandomForest\" \"boruta\"       \"background\"  \n[6] \"DEG_rural\"    \"DEG_urban\"   \n\n\nCompute overlap matrix:\n\nlibrary(GeneSelectR)\n\noverlap_matrix &lt;- calculate_overlap_coefficients(\n  gene_lists,\n  coefficient = \"overlap\"  # or \"jaccard\"\n)\n\n# Result: symmetric matrix of pairwise overlaps\noverlap_matrix"
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#visualization",
+    "href": "08_overlap_and_stability.html#visualization",
+    "title": "Overlap and Stability Analysis",
+    "section": "4 Visualization",
+    "text": "4 Visualization\n\n4.1 Heatmap of Overlaps\n\nplot_overlap_heatmaps(\n  overlap_matrix,\n  title = \"Gene Set Overlap (Inbuilt Importance)\",\n  color_palette = \"Blues\"\n)\n\nExpected output: Heatmap where darker colors indicate higher overlap.\nInterpretation:\n\nDiagonal = 1 (perfect self-overlap)\nOff-diagonal values reveal method concordance\nClusters of high overlap suggest methods capturing similar signals\n\n\n\n4.2 UpSet Plot\nFor more than 3 sets, UpSet plots show intersection sizes:\n\nplot_upset(\n  gene_lists,\n  nsets = length(gene_lists),\n  order.by = \"freq\"\n)\n\nExpected output: Bar plot showing:\n\nUnique genes per method\nPairwise intersections\nHigher-order intersections (e.g., genes in all 3 methods)\n\nInterpretation:\n\nLarge exclusive sets suggest method-specific discoveries\nLarge intersections suggest consensus genes"
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#stability-analysis",
+    "href": "08_overlap_and_stability.html#stability-analysis",
+    "title": "Overlap and Stability Analysis",
+    "section": "5 Stability Analysis",
+    "text": "5 Stability Analysis\n\n5.1 Concept\nStability measures feature selection consistency across perturbed datasets (e.g., bootstrap samples).\nHighly stable methods select similar features regardless of sampling variability; unstable methods are sensitive to data perturbations.\n\n\n5.2 Stability Metrics\n\nJaccard stability: Average Jaccard index across bootstrap pairs\nPairwise overlap: Overlap between selections on different samples\n\n\n\n5.3 Running Stability Analysis\nGeneSelectR includes inst/extras/ scripts for bootstrap-based stability (not executed in vignettes to save time):\n\n# Pseudocode (actual script at inst/extras/stability_analysis.R)\nbootstrap_results &lt;- lapply(1:100, function(i) {\n  # Resample data with replacement\n  sample_idx &lt;- sample(1:nrow(X), replace = TRUE)\n  X_boot &lt;- X[sample_idx, ]\n  y_boot &lt;- y[sample_idx]\n  \n  # Run feature selection\n  results &lt;- perform_grid_search(X_boot, y_boot, ...)\n  \n  # Extract selected features\n  top_features &lt;- names(results@inbuilt_feature_importance$Lasso[1:50])\n  return(top_features)\n})\n\n# Compute pairwise Jaccard\nstability_scores &lt;- combn(1:100, 2, function(idx) {\n  length(intersect(bootstrap_results[[idx[1]]], bootstrap_results[[idx[2]]])) /\n    length(union(bootstrap_results[[idx[1]]], bootstrap_results[[idx[2]]]))\n})\n\nmean(stability_scores)  # Overall stability\n\n\n\n5.4 Interpreting Stability\n\nHigh stability (&gt;0.8): Robust gene signature, reliable across samples\nMedium stability (0.5-0.8): Moderate robustness, validate with external data\nLow stability (&lt;0.5): Unstable selection, consider:\n\nIncreasing sample size\nReducing feature space (correlation filtering)\nUsing ensemble methods"
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#design-rationale",
+    "href": "08_overlap_and_stability.html#design-rationale",
+    "title": "Overlap and Stability Analysis",
+    "section": "6 Design Rationale",
+    "text": "6 Design Rationale\n\n6.1 Why Multiple Overlap Metrics?\n\nJaccard: Standard, symmetric, penalizes size differences\nOverlap coefficient: Favors smaller sets, useful when comparing methods with different selection cardinalities\n\nReporting both provides a fuller picture.\n\n\n6.2 Why Stability Matters\nHigh predictive performance does not guarantee biological validity:\n\nOverfitting: Model memorizes noise, selecting spurious features\nData-specific patterns: Features unique to the dataset, not generalizable\n\nStability testing via resampling identifies robust signals.\n\n\n6.3 Why Not Always Require High Overlap?\nLow overlap between methods can indicate:\n\nComplementary signals: Methods capture different aspects of biology (good!)\nInstability: Both selections are noisy (bad)\n\nDistinguish via external validation (e.g., literature support, pathway analysis)."
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#example-workflow",
+    "href": "08_overlap_and_stability.html#example-workflow",
+    "title": "Overlap and Stability Analysis",
+    "section": "7 Example Workflow",
+    "text": "7 Example Workflow\n\n# 1. Run feature selection with multiple methods\nresults &lt;- perform_grid_search(X, y, ...)\n\n# 2. Annotate gene lists\nannotated &lt;- annotate_gene_lists(results, species = \"Homo.sapiens\")\n\n# 3. Extract symbols per method\ngene_lists_inbuilt &lt;- lapply(annotated@inbuilt, function(gl) gl@SYMBOL)\ngene_lists_perm &lt;- lapply(annotated@permutation, function(gl) gl@SYMBOL)\n\n# 4. Compute overlaps (inbuilt)\noverlap_inbuilt &lt;- calculate_overlap_coefficients(gene_lists_inbuilt, \"jaccard\")\n\n# 5. Compute overlaps (permutation)\noverlap_perm &lt;- calculate_overlap_coefficients(gene_lists_perm, \"jaccard\")\n\n# 6. Visualize\nplot_overlap_heatmaps(overlap_inbuilt, title = \"Inbuilt Importance Overlap\")\nplot_overlap_heatmaps(overlap_perm, title = \"Permutation Importance Overlap\")\n\n# 7. UpSet plot for consensus\nplot_upset(gene_lists_inbuilt, nsets = 4, order.by = \"freq\")\n\n# 8. Identify consensus genes\nconsensus &lt;- Reduce(intersect, gene_lists_inbuilt)\ncat(\"Consensus genes:\", length(consensus), \"\\n\")"
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#case-study-interpreting-low-overlap",
+    "href": "08_overlap_and_stability.html#case-study-interpreting-low-overlap",
+    "title": "Overlap and Stability Analysis",
+    "section": "8 Case Study: Interpreting Low Overlap",
+    "text": "8 Case Study: Interpreting Low Overlap\nSuppose LASSO and Random Forest share only 20% of genes:\nPossible explanations:\n\nLinear vs non-linear signals: LASSO captures marginal effects; RF captures interactions\nRegularization differences: Different penalty strengths\nInstability: Both methods overfitting\n\nNext steps:\n\nCheck stability via bootstrap\nCompare GO enrichment (do both sets enrich similar pathways?)\nValidate on external dataset"
+  },
+  {
+    "objectID": "08_overlap_and_stability.html#summary",
+    "href": "08_overlap_and_stability.html#summary",
+    "title": "Overlap and Stability Analysis",
+    "section": "9 Summary",
+    "text": "9 Summary\nGeneSelectR’s overlap and stability tools:\n\nQuantify agreement between feature selection methods\nVisualize overlaps via heatmaps and UpSet plots\nAssess robustness via bootstrap resampling (optional)\n\nThe next chapter explores functional interpretation via GO enrichment.\n\nNext: GO Enrichment Analysis"
+  },
+  {
+    "objectID": "02_setup_uv_reticulate.html",
+    "href": "02_setup_uv_reticulate.html",
+    "title": "Environment Setup with uv and reticulate",
+    "section": "",
+    "text": "GeneSelectR uses uv for Python dependency management instead of traditional pip + virtualenv because:\n\nSpeed: uv is written in Rust and is 10-100× faster than pip\nDeterminism: Lockfile-style resolution ensures reproducible installs\nSimplicity: Single tool for environment creation and package management\n\nThe R-Python bridge is handled by reticulate, which allows seamless calling of Python objects and functions from R."
+  },
+  {
+    "objectID": "02_setup_uv_reticulate.html#philosophy-reproducible-python-environments",
+    "href": "02_setup_uv_reticulate.html#philosophy-reproducible-python-environments",
+    "title": "Environment Setup with uv and reticulate",
+    "section": "",
+    "text": "GeneSelectR uses uv for Python dependency management instead of traditional pip + virtualenv because:\n\nSpeed: uv is written in Rust and is 10-100× faster than pip\nDeterminism: Lockfile-style resolution ensures reproducible installs\nSimplicity: Single tool for environment creation and package management\n\nThe R-Python bridge is handled by reticulate, which allows seamless calling of Python objects and functions from R."
+  },
+  {
+    "objectID": "02_setup_uv_reticulate.html#setting-up-the-python-environment",
+    "href": "02_setup_uv_reticulate.html#setting-up-the-python-environment",
+    "title": "Environment Setup with uv and reticulate",
+    "section": "2 Setting Up the Python Environment",
+    "text": "2 Setting Up the Python Environment\n\n2.1 Step 1: Install uv (if not already installed)\n# macOS/Linux\ncurl -LsSf https://astral.sh/uv/install.sh | sh\n\n# Or via Homebrew\nbrew install uv\n\n\n2.2 Step 2: Create a Virtual Environment\nFrom the GeneSelectR project root:\ncd /Users/zero/Desktop/GeneSelectR\nuv venv .venv\nThis creates a .venv/ directory containing an isolated Python installation.\n\n\n2.3 Step 3: Install Python Dependencies\nGeneSelectR’s Python requirements are specified in inst/python/requirements.txt:\nuv pip install -r inst/python/requirements.txt\nThis installs:\n\nscikit-learn: Core ML algorithms\nnumpy, pandas: Data manipulation\nscikit-optimize: Bayesian hyperparameter optimization\nboruta: Boruta feature selection\nAdditional dependencies as needed\n\n\n\n2.4 Step 4: Bind reticulate to the uv Environment\nIn R, point reticulate to the uv-managed Python interpreter:\n\nlibrary(tidyverse)\nlibrary(reticulate)\n\n# Point to the uv venv\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nvenv_path &lt;- file.path(project_root, \".venv\")\nSys.unsetenv(\"RETICULATE_PYTHON\")\nuse_python(file.path(venv_path, \"bin\", \"python\"), required = TRUE)\n\n# Verify configuration\npy_config()\n\npython:         /Users/zero/Desktop/GeneSelectR/.venv/bin/python\nlibpython:      /Users/zero/miniconda3/lib/libpython3.9.dylib\npythonhome:     /Users/zero/Desktop/GeneSelectR/.venv:/Users/zero/Desktop/GeneSelectR/.venv\nvirtualenv:     /Users/zero/Desktop/GeneSelectR/.venv/bin/activate_this.py\nversion:        3.9.16 | packaged by conda-forge | (main, Feb  1 2023, 21:42:20)  [Clang 14.0.6 ]\nnumpy:          /Users/zero/Desktop/GeneSelectR/.venv/lib/python3.9/site-packages/numpy\nnumpy_version:  2.0.2\n\nNOTE: Python version was forced by use_python() function\n\n\nOutput (example):\npython:         /Users/zero/Desktop/GeneSelectR/.venv/bin/python\nlibpython:      /Users/zero/Desktop/GeneSelectR/.venv/lib/libpython3.11.dylib\npythonhome:     /Users/zero/Desktop/GeneSelectR/.venv\nversion:        3.11.5\nnumpy:          /Users/zero/Desktop/GeneSelectR/.venv/lib/python3.11/site-packages/numpy\nsklearn:        /Users/zero/Desktop/GeneSelectR/.venv/lib/python3.11/site-packages/sklearn\n\n\n2.5 Step 5: Test the Connection\n\n# Import Python modules via reticulate\nsklearn &lt;- import(\"sklearn\")\nnp &lt;- import(\"numpy\")\n\n# Check versions\ncat(\"scikit-learn version:\", sklearn$`__version__`, \"\\n\")\ncat(\"numpy version:\", np$`__version__`, \"\\n\")\n\nIf imports succeed without errors, the environment is ready."
+  },
+  {
+    "objectID": "02_setup_uv_reticulate.html#reproducibility-guarantees",
+    "href": "02_setup_uv_reticulate.html#reproducibility-guarantees",
+    "title": "Environment Setup with uv and reticulate",
+    "section": "3 Reproducibility Guarantees",
+    "text": "3 Reproducibility Guarantees\n\n3.1 Cache and Freeze\nQuarto’s freeze: auto setting ensures:\n\nComputation results are cached after first render\nRe-renders only happen when source .qmd changes\nPrevents drift from upstream package updates during documentation updates\n\n\n\n3.2 Random Seeds\nFor reproducible machine learning:\n\nset.seed(42)  # R seed\npy_run_string(\"import numpy as np; np.random.seed(42)\")  # Python seed\n\nPass random_state parameters to sklearn functions explicitly.\n\n\n3.3 Environment Snapshots\nTo capture exact package versions:\nuv pip freeze &gt; requirements.lock\nRestore later with:\nuv pip install -r requirements.lock"
+  },
+  {
+    "objectID": "02_setup_uv_reticulate.html#design-rationale",
+    "href": "02_setup_uv_reticulate.html#design-rationale",
+    "title": "Environment Setup with uv and reticulate",
+    "section": "4 Design Rationale",
+    "text": "4 Design Rationale\n\n4.1 Why Not Conda/Mamba?\nWhile Conda is popular in bioinformatics, uv offers:\n\nLighter weight: No 500MB+ base installation\nFaster installs: Parallel downloads and installs\nBetter R integration: Standard Python venvs work seamlessly with reticulate\n\n\n\n4.2 Why Not renv for Python?\nR’s renv can manage Python, but:\n\nLess mature than uv for Python-specific workflows\nSlower package resolution\nLimited support for scikit-learn’s binary dependencies\n\n\n\n4.3 Why Separate from Package Installation?\nGeneSelectR does not bundle Python dependencies in the R package because:\n\nCRAN policy: Binary Python packages would bloat package size\nFlexibility: Users may have existing ML environments\nIsolation: Documentation environment is independent of package tests"
+  },
+  {
+    "objectID": "02_setup_uv_reticulate.html#troubleshooting",
+    "href": "02_setup_uv_reticulate.html#troubleshooting",
+    "title": "Environment Setup with uv and reticulate",
+    "section": "5 Troubleshooting",
+    "text": "5 Troubleshooting\n\n5.1 “Python module not found”\n# Check module availability\npy_module_available(\"sklearn\")\n\n# List installed packages\npy_run_string(\"import pkg_resources; print([p.project_name for p in pkg_resources.working_set])\")\n\n\n5.2 “Wrong Python version”\nEnsure use_python() points to the uv venv:\nSys.which(\"python\")  # Should NOT be system Python\npy_config()$python   # Should be /path/to/.venv/bin/python\n\n\n5.3 “Segmentation fault on import”\nLikely a binary compatibility issue. Rebuild the environment:\nrm -rf .venv\nuv venv .venv\nuv pip install -r inst/python/requirements.txt"
+  },
+  {
+    "objectID": "02_setup_uv_reticulate.html#summary",
+    "href": "02_setup_uv_reticulate.html#summary",
+    "title": "Environment Setup with uv and reticulate",
+    "section": "6 Summary",
+    "text": "6 Summary\nWith uv and reticulate configured:\n\nPython dependencies are isolated in .venv/\nR can call Python functions via import() and py_run_*()\nReproducibility is ensured via lockfiles and caching\nNo modifications to GeneSelectR source code are needed\n\n\nNext: Core Classes: S4 Objects and Semantics"
+  },
+  {
+    "objectID": "03_core_classes.html",
+    "href": "03_core_classes.html",
+    "title": "Core Classes: S4 Objects and Semantics",
+    "section": "",
+    "text": "R offers multiple object systems (S3, S4, R6, R7). GeneSelectR uses S4 because:\n\nFormal contracts: Slots have enforced types (e.g., list, data.frame)\nMethod dispatch: Generic functions can specialize on class signatures\nBioconductor compatibility: Most Bioconductor classes use S4 (e.g., SummarizedExperiment)\nValidation: Custom validity methods ensure object consistency\n\nThe three core classes are:\n\nPipelineResults: Complete output from feature selection workflows\nGeneList: Gene identifiers in three naming systems\nAnnotatedGeneLists: Collection of GeneList objects per method"
+  },
+  {
+    "objectID": "03_core_classes.html#why-s4-for-geneselectr",
+    "href": "03_core_classes.html#why-s4-for-geneselectr",
+    "title": "Core Classes: S4 Objects and Semantics",
+    "section": "",
+    "text": "R offers multiple object systems (S3, S4, R6, R7). GeneSelectR uses S4 because:\n\nFormal contracts: Slots have enforced types (e.g., list, data.frame)\nMethod dispatch: Generic functions can specialize on class signatures\nBioconductor compatibility: Most Bioconductor classes use S4 (e.g., SummarizedExperiment)\nValidation: Custom validity methods ensure object consistency\n\nThe three core classes are:\n\nPipelineResults: Complete output from feature selection workflows\nGeneList: Gene identifiers in three naming systems\nAnnotatedGeneLists: Collection of GeneList objects per method"
+  },
+  {
+    "objectID": "03_core_classes.html#class-definitions",
+    "href": "03_core_classes.html#class-definitions",
+    "title": "Core Classes: S4 Objects and Semantics",
+    "section": "2 Class Definitions",
+    "text": "2 Class Definitions\n\n2.1 PipelineResults\nContainer for all outputs from perform_grid_search():\n\nsetClass(\"PipelineResults\",\n         slots = list(\n           best_pipeline = \"list\",              # Winning hyperparameters\n           cv_results = \"list\",                 # Full CV results per method\n           inbuilt_feature_importance = \"list\", # Model-based importances\n           permutation_importance = \"list\",     # Permutation importances\n           cv_mean_score = \"data.frame\",        # Aggregated CV scores\n           test_metrics = \"TestMetrics\"         # Test set performance (df or list)\n         ))\n\nSlot semantics:\n\nbest_pipeline: Named list with keys like \"method\", \"scaler\", \"params\", \"score\"\ncv_results: Nested list where cv_results[[method]] contains sklearn’s cv_results_ dict\ninbuilt_feature_importance: List of numeric vectors (feature → importance)\npermutation_importance: List of data.frames with columns feature, importance_mean, importance_std\ncv_mean_score: data.frame with columns method, mean_score, sd_score, rank\ntest_metrics: Either a data.frame (single split) or list of data.frames (multiple splits)\n\nDesign rationale: Keeping all outputs in one object simplifies downstream analysis and avoids scattered artifacts.\n\n\n2.2 Loading a Real Object\nLet’s load a PipelineResults fixture from the test suite:\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\ndevtools::load_all(project_root)\nfixture_path &lt;- file.path(project_root, \"tests/testthat/fixtures/PipelineResults.rds\")\n\npipeline_results &lt;- readRDS(fixture_path)\n\n# Inspect structure\ncat(\"Class:\", class(pipeline_results), \"\\n\")\n\nClass: PipelineResults \n\ncat(\"Slots:\", slotNames(pipeline_results), \"\\n\")\n\nSlots: best_pipeline cv_results inbuilt_feature_importance permutation_importance cv_mean_score test_metrics \n\n\n\n2.2.1 Best Pipeline\n\nstr(pipeline_results@best_pipeline, max.level = 1)\n\nThe best pipeline includes the winning method name, hyperparameters, and CV score.\n\n\n2.2.2 CV Mean Scores\n\nhead(pipeline_results@cv_mean_score)\n\n        method mean_score    sd_score\n1       boruta  0.9210374 0.012047342\n2        Lasso  0.9153061 0.007984372\n3 RandomForest  0.9127721 0.007926976\n4   Univariate  0.9045578 0.011999833\n\n\nEach row represents a feature selection method, ranked by cross-validation performance.\n\n\n2.2.3 Feature Importances\n\n# Inbuilt importances (top 5 features per method)\nlapply(pipeline_results@inbuilt_feature_importance, function(x) head(x, 5))\n\n$Lasso\n# A tibble: 5 × 8\n  feature         mean_importance   std rank_Lasso_split_3 rank_Lasso_split_2\n  &lt;chr&gt;                     &lt;dbl&gt; &lt;dbl&gt;              &lt;int&gt;              &lt;int&gt;\n1 ENSG00000001630        0.00732     NA                  2                 NA\n2 ENSG00000002726        0.000388    NA                 NA                  9\n3 ENSG00000003436        0.00315     NA                 NA                  4\n4 ENSG00000003756        0.000750    NA                  5                 NA\n5 ENSG00000003989        0.000162    NA                 NA                 11\n# ℹ 3 more variables: rank_Lasso_split_1 &lt;int&gt;, rank_Lasso_split_4 &lt;int&gt;,\n#   rank_Lasso_split_5 &lt;int&gt;\n\n$Univariate\n# A tibble: 5 × 8\n  feature mean_importance      std rank_Univariate_spli…¹ rank_Univariate_spli…²\n  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt;                  &lt;int&gt;                  &lt;int&gt;\n1 ENSG00…         0.00718 NA                            1                     NA\n2 ENSG00…         0.00745  0.00928                     NA                      1\n3 ENSG00…         0.00163 NA                           NA                     NA\n4 ENSG00…         0.00430 NA                            2                     NA\n5 ENSG00…         0.00563 NA                           NA                     NA\n# ℹ abbreviated names: ¹​rank_Univariate_split_2, ²​rank_Univariate_split_4\n# ℹ 3 more variables: rank_Univariate_split_5 &lt;int&gt;,\n#   rank_Univariate_split_3 &lt;int&gt;, rank_Univariate_split_1 &lt;int&gt;\n\n$RandomForest\n# A tibble: 5 × 8\n  feature    mean_importance   std rank_RandomForest_sp…¹ rank_RandomForest_sp…²\n  &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt;                  &lt;int&gt;                  &lt;int&gt;\n1 ENSG00000…        0.0133      NA                      1                     NA\n2 ENSG00000…        0.00531     NA                     NA                      1\n3 ENSG00000…        0.00260     NA                     NA                     NA\n4 ENSG00000…        0.000733    NA                     NA                     NA\n5 ENSG00000…        0.00306     NA                      4                     NA\n# ℹ abbreviated names: ¹​rank_RandomForest_split_2, ²​rank_RandomForest_split_1\n# ℹ 3 more variables: rank_RandomForest_split_3 &lt;int&gt;,\n#   rank_RandomForest_split_5 &lt;int&gt;, rank_RandomForest_split_4 &lt;int&gt;\n\n$boruta\n# A tibble: 5 × 8\n  feature          mean_importance   std rank_boruta_split_3 rank_boruta_split_2\n  &lt;chr&gt;                      &lt;dbl&gt; &lt;dbl&gt;               &lt;int&gt;               &lt;int&gt;\n1 ENSG00000003436         0.000369    NA                  57                  NA\n2 ENSG00000003756         0.00205     NA                  14                  NA\n3 ENSG00000004399         0.00132     NA                  18                  NA\n4 ENSG00000004478…        0.000711    NA                  36                  NA\n5 ENSG00000005001         0.000281    NA                  67                  NA\n# ℹ 3 more variables: rank_boruta_split_4 &lt;int&gt;, rank_boruta_split_5 &lt;int&gt;,\n#   rank_boruta_split_1 &lt;int&gt;\n\n\nEach method yields a named numeric vector where names are feature identifiers and values are importance scores.\n\n\n\n2.3 GeneList\nSimple container for gene identifiers in three formats:\n\nsetClass(\"GeneList\",\n         slots = list(\n           SYMBOL = \"character\",   # Official gene symbols (e.g., \"TP53\")\n           ENSEMBL = \"character\",  # Ensembl IDs (e.g., \"ENSG00000141510\")\n           ENTREZID = \"character\"  # NCBI Entrez IDs (e.g., \"7157\")\n         ))\n\nWhy three formats?\n\nSYMBOL: Human-readable, used in publications\nENSEMBL: Stable across species, used in genomic databases\nENTREZID: Required for clusterProfiler GO enrichment\n\nConversion is handled by annotate_gene_lists() using org.db annotation packages.\n\n\n2.4 AnnotatedGeneLists\nCollection of GeneList objects, stratified by importance type:\n\nsetClass(\"AnnotatedGeneLists\",\n         representation(\n           inbuilt = \"list\",      # List of GeneList objects (model-based)\n           permutation = \"list\"   # List of GeneList objects (permutation-based)\n         ))\n\nStructure:\nAnnotatedGeneLists\n├── inbuilt\n│   ├── Lasso → GeneList(SYMBOL, ENSEMBL, ENTREZID)\n│   ├── RandomForest → GeneList(...)\n│   └── Univariate → GeneList(...)\n└── permutation\n    ├── Lasso → GeneList(...)\n    └── ...\nEach named element corresponds to a feature selection method.\n\n\n2.5 Loading Annotated Gene Lists\n\nannotated_path &lt;- file.path(project_root, \"tests/testthat/fixtures/AnnotatedGeneLists.rds\")\nannotated_lists &lt;- readRDS(annotated_path)\n\ncat(\"Class:\", class(annotated_lists), \"\\n\")\n\nClass: AnnotatedGeneLists \n\ncat(\"Inbuilt methods:\", names(annotated_lists@inbuilt), \"\\n\")\n\nInbuilt methods: Lasso Univariate RandomForest boruta background DEG_rural DEG_urban \n\ncat(\"Permutation methods:\", names(annotated_lists@permutation), \"\\n\")\n\nPermutation methods: Lasso Univariate RandomForest boruta background DEG_rural DEG_urban \n\n\n\n2.5.1 Inspecting a Single GeneList\n\n# Example: Lasso inbuilt features\nlasso_genes &lt;- annotated_lists@inbuilt$Lasso\n\ncat(\"Number of genes:\", length(lasso_genes@SYMBOL), \"\\n\")\n\nNumber of genes: 1118 \n\ncat(\"First 5 symbols:\", head(lasso_genes@SYMBOL, 5), \"\\n\")\n\nFirst 5 symbols: CDK11A NADK ACOT7 DNAJC11 VAMP3 \n\ncat(\"First 5 Ensembl:\", head(lasso_genes@ENSEMBL, 5), \"\\n\")\n\nFirst 5 Ensembl: ENSG00000008128 ENSG00000008130 ENSG00000097021 ENSG00000007923 ENSG00000049245"
+  },
+  {
+    "objectID": "03_core_classes.html#class-usage-patterns",
+    "href": "03_core_classes.html#class-usage-patterns",
+    "title": "Core Classes: S4 Objects and Semantics",
+    "section": "3 Class Usage Patterns",
+    "text": "3 Class Usage Patterns\n\n3.1 Creating Objects Manually\nTypically, users don’t create these objects directly—they’re returned by package functions. But for testing:\n\nmy_genes &lt;- new(\"GeneList\",\n                SYMBOL = c(\"TP53\", \"EGFR\", \"BRCA1\"),\n                ENSEMBL = c(\"ENSG00000141510\", \"ENSG00000146648\", \"ENSG00000012048\"),\n                ENTREZID = c(\"7157\", \"1956\", \"672\"))\n\n\n\n3.2 Accessing Slots\n\n# Direct slot access (discouraged in production code)\npipeline_results@best_pipeline\n\n# Better: Define accessor methods\nsetGeneric(\"getBestPipeline\", function(object) standardGeneric(\"getBestPipeline\"))\nsetMethod(\"getBestPipeline\", \"PipelineResults\", function(object) object@best_pipeline)\n\nGeneSelectR provides minimal accessors; users typically access slots directly in interactive analysis.\n\n\n3.3 Type Safety\n\n# This would fail at object creation:\nbad_pipeline &lt;- new(\"PipelineResults\",\n                    best_pipeline = \"not a list\",  # Type mismatch!\n                    cv_results = list(),\n                    ...)\n# Error: invalid class \"PipelineResults\" object: \n# invalid object for slot \"best_pipeline\" in class \"PipelineResults\": \n# got class \"character\", should be or extend class \"list\""
+  },
+  {
+    "objectID": "03_core_classes.html#design-trade-offs",
+    "href": "03_core_classes.html#design-trade-offs",
+    "title": "Core Classes: S4 Objects and Semantics",
+    "section": "4 Design Trade-offs",
+    "text": "4 Design Trade-offs\n\n4.1 S4 vs S3\nS4 advantages:\n\nCompile-time type checking\nFormal documentation via @slot tags\nMethod dispatch on multiple arguments (not used in GeneSelectR but available)\n\nS4 disadvantages:\n\nVerbose syntax (@ instead of $)\nSteeper learning curve\nSlower object creation (negligible for GeneSelectR’s use case)\n\n\n\n4.2 S4 vs R6\nR6 offers:\n\nReference semantics (modify in-place)\nPrivate fields and methods\nSimpler inheritance\n\nBut GeneSelectR chose S4 for immutability and Bioconductor alignment. Pipeline results should not be modified after creation.\n\n\n4.3 Flat vs Nested Structures\nPipelineResults could have been split into separate objects (CVResults, ImportanceResults, etc.), but:\n\nA single object simplifies API: results &lt;- perform_grid_search(...)\nAll related outputs are bundled for archiving (saveRDS(results, \"run1.rds\"))\nDownstream functions expect a consistent input type"
+  },
+  {
+    "objectID": "03_core_classes.html#summary",
+    "href": "03_core_classes.html#summary",
+    "title": "Core Classes: S4 Objects and Semantics",
+    "section": "5 Summary",
+    "text": "5 Summary\nGeneSelectR’s S4 classes provide:\n\nType-safe containers for complex ML outputs\nSelf-documenting code via slot definitions\nSeamless integration with Bioconductor tools\n\nThe next chapter explores how these objects are populated via Python integration.\n\nNext: Python Integration: R ↔︎ Python Interface"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html",
+    "href": "06_metrics_and_visualization.html",
+    "title": "Metrics and Visualization",
+    "section": "",
+    "text": "GeneSelectR evaluates feature selection pipelines using standard classification metrics:\n\nF1 Score: Harmonic mean of precision and recall (balances false positives/negatives)\nAccuracy: Proportion of correct predictions\nPrecision: Proportion of positive predictions that are correct\nRecall: Proportion of actual positives correctly identified\nAUC-ROC: Area under the receiver operating characteristic curve\n\nThese metrics are computed at two stages:\n\nCross-validation: On training folds (for hyperparameter selection)\nTest set: On held-out data (for unbiased performance estimation)"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#performance-metrics-framework",
+    "href": "06_metrics_and_visualization.html#performance-metrics-framework",
+    "title": "Metrics and Visualization",
+    "section": "",
+    "text": "GeneSelectR evaluates feature selection pipelines using standard classification metrics:\n\nF1 Score: Harmonic mean of precision and recall (balances false positives/negatives)\nAccuracy: Proportion of correct predictions\nPrecision: Proportion of positive predictions that are correct\nRecall: Proportion of actual positives correctly identified\nAUC-ROC: Area under the receiver operating characteristic curve\n\nThese metrics are computed at two stages:\n\nCross-validation: On training folds (for hyperparameter selection)\nTest set: On held-out data (for unbiased performance estimation)"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#cross-validation-metrics",
+    "href": "06_metrics_and_visualization.html#cross-validation-metrics",
+    "title": "Metrics and Visualization",
+    "section": "2 Cross-Validation Metrics",
+    "text": "2 Cross-Validation Metrics\n\n2.1 Extracting CV Scores\nAfter perform_grid_search(), results contain CV scores for all hyperparameter combinations:\n\nsuppressPackageStartupMessages({\n  library(dplyr)\n  library(ggplot2)\n})\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nfixture_path &lt;- file.path(project_root, \"tests/testthat/fixtures/PipelineResults.rds\")\nresults &lt;- readRDS(fixture_path)\n\nRaw CV results (truncated for brevity):\n\n# Example: Lasso CV results\nlasso_cv &lt;- results@cv_results$Lasso\nnames(lasso_cv)  # Keys from sklearn's cv_results_ dict\n\nNULL\n\n\n\n\n2.2 Aggregated CV Scores\ncalculate_mean_cv_scores() computes mean and std across folds:\n\ncv_scores &lt;- results@cv_mean_score\n\n# Rank methods by mean score\ncv_scores %&gt;%\n  arrange(desc(mean_score)) %&gt;%\n  select(method, mean_score, sd_score)\n\n        method mean_score    sd_score\n1       boruta  0.9210374 0.012047342\n2        Lasso  0.9153061 0.007984372\n3 RandomForest  0.9127721 0.007926976\n4   Univariate  0.9045578 0.011999833\n\n\nInterpretation:\n\nmean_score: Average performance across CV folds (higher = better)\nsd_score: Variability across folds (lower = more stable)\nrank: Ranking among methods (1 = best)"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#test-set-metrics",
+    "href": "06_metrics_and_visualization.html#test-set-metrics",
+    "title": "Metrics and Visualization",
+    "section": "3 Test Set Metrics",
+    "text": "3 Test Set Metrics\n\n3.1 Evaluation on Held-Out Data\nTo avoid overestimating performance (CV leakage), evaluate on a separate test set:\n\n# Split data\ntrain_idx &lt;- sample(1:nrow(X), size = 0.7 * nrow(X))\nX_train &lt;- X[train_idx, ]\ny_train &lt;- y[train_idx]\nX_test &lt;- X[-train_idx, ]\ny_test &lt;- y[-train_idx]\n\n# Fit on training, evaluate on test\nresults &lt;- perform_grid_search(X_train, y_train, ...)\ntest_metrics &lt;- evaluate_test_metrics(results, X_test, y_test)\n\n\n\n3.2 Test Metrics Structure\n\n# From fixture (simulated test set)\ntest_metrics &lt;- results@test_metrics\n\n# Structure depends on evaluation mode\nif (is.data.frame(test_metrics)) {\n  head(test_metrics)\n} else {\n  cat(\"Test metrics is a list with\", length(test_metrics), \"elements\\n\")\n}\n\n# A tibble: 4 × 9\n  method       f1_mean  f1_sd recall_mean recall_sd precision_mean precision_sd\n  &lt;chr&gt;          &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;          &lt;dbl&gt;        &lt;dbl&gt;\n1 Lasso          0.854 0.0351       0.858    0.0388          0.870       0.0262\n2 RandomForest   0.873 0.0346       0.876    0.0356          0.883       0.0286\n3 Univariate     0.859 0.0127       0.863    0.0150          0.866       0.0136\n4 boruta         0.876 0.0251       0.876    0.0273          0.889       0.0234\n# ℹ 2 more variables: accuracy_mean &lt;dbl&gt;, accuracy_sd &lt;dbl&gt;\n\n\nColumns (if data.frame):\n\nmethod: Feature selection method\nf1_mean, f1_std: F1 score (mean ± std across splits)\naccuracy_mean, accuracy_std: Accuracy\nprecision_mean, precision_std: Precision\nrecall_mean, recall_std: Recall"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#visualization-with-plot_metrics",
+    "href": "06_metrics_and_visualization.html#visualization-with-plot_metrics",
+    "title": "Metrics and Visualization",
+    "section": "4 Visualization with plot_metrics()",
+    "text": "4 Visualization with plot_metrics()\n\n4.1 CV Scores Plot\n\n# library(GeneSelectR)\n\np &lt;- plot_metrics(\n  results\n)\nprint(p)\n\nExpected output: Bar plot of mean CV scores per method with error bars (std).\n\n\n4.2 Test Scores Plot\n\np &lt;- plot_metrics(\n  results\n)\nprint(p)\n\nExpected output: Grouped bar plot of F1, accuracy, precision, recall per method.\n\n\n4.3 Customization\nplot_metrics() returns a ggplot object, allowing further customization:\n\np &lt;- plot_metrics(results)\n\np + \n  labs(title = \"Cross-Validation Performance Comparison\") +\n  theme_minimal() +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#interpreting-metrics",
+    "href": "06_metrics_and_visualization.html#interpreting-metrics",
+    "title": "Metrics and Visualization",
+    "section": "5 Interpreting Metrics",
+    "text": "5 Interpreting Metrics\n\n5.1 F1 vs Accuracy\nWhen to prioritize F1:\n\nImbalanced classes (e.g., 90% control, 10% disease)\nFalse negatives/positives have unequal costs\n\nWhen to prioritize accuracy:\n\nBalanced classes\nEqual cost for all error types\n\nExample: Cancer diagnosis (imbalanced, high cost of false negatives) → Use F1.\n\n\n5.2 Precision vs Recall Trade-off\n\nHigh precision: Few false positives (conservative gene selection)\nHigh recall: Few false negatives (liberal gene selection)\n\nGeneSelectR uses F1 (balanced) by default, but users can optimize for specific metrics.\n\n\n5.3 Variance Matters\n\n# Method A: mean=0.85, std=0.10 (unstable)\n# Method B: mean=0.83, std=0.02 (stable)\n\n# Prefer Method B if consistency is critical (e.g., clinical deployment)\n\nLow variance indicates robust feature selection across different data splits."
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#comparing-methods",
+    "href": "06_metrics_and_visualization.html#comparing-methods",
+    "title": "Metrics and Visualization",
+    "section": "6 Comparing Methods",
+    "text": "6 Comparing Methods\n\n6.1 Statistical Significance\nFor rigorous comparison, use paired tests on CV folds:\n\n# Extract fold-level scores for two methods\nlasso_scores &lt;- results@cv_results$Lasso$split_test_score\nrf_scores &lt;- results@cv_results$RandomForest$split_test_score\n\n# Paired t-test\nt.test(lasso_scores, rf_scores, paired = TRUE)\n\nCaution: Multiple comparisons require correction (e.g., Bonferroni).\n\n\n6.2 Effect Size\n\n# Cohen's d\nmean_diff &lt;- mean(lasso_scores - rf_scores)\npooled_sd &lt;- sqrt((var(lasso_scores) + var(rf_scores)) / 2)\ncohens_d &lt;- mean_diff / pooled_sd\n\n# Interpretation: |d| &gt; 0.8 = large effect"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#design-considerations",
+    "href": "06_metrics_and_visualization.html#design-considerations",
+    "title": "Metrics and Visualization",
+    "section": "7 Design Considerations",
+    "text": "7 Design Considerations\n\n7.1 Why Multiple Metrics?\nSingle metrics can be misleading:\n\nAccuracy paradox: 95% accuracy on 95:5 class split achieved by always predicting majority class\nF1 alone: Ignores true negatives (less critical for gene selection but relevant for balanced reporting)\n\nGeneSelectR reports all standard metrics for transparency.\n\n\n7.2 Why Report Standard Deviation?\nMachine learning performance varies across:\n\nRandom initialization\nData splits\nHyperparameter configurations\n\nReporting std quantifies this uncertainty, guiding method selection.\n\n\n7.3 Why Separate CV and Test Metrics?\n\nCV metrics: For hyperparameter tuning (biased estimate)\nTest metrics: For unbiased performance evaluation\n\nConflating the two leads to overoptimistic estimates."
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#example-workflow",
+    "href": "06_metrics_and_visualization.html#example-workflow",
+    "title": "Metrics and Visualization",
+    "section": "8 Example Workflow",
+    "text": "8 Example Workflow\n\n# 1. Run grid search with CV\nresults &lt;- perform_grid_search(X_train, y_train, ...)\n\n# 2. Compare methods via CV scores\ncv_comparison &lt;- results@cv_mean_score %&gt;%\n  arrange(desc(mean_score))\n\n# 3. Select top method\nbest_method &lt;- cv_comparison$method[1]\n\n# 4. Evaluate on test set\ntest_metrics &lt;- evaluate_test_metrics(results, X_test, y_test)\n\n# 5. Visualize\nplot_metrics(results, metric_type = \"test\")\n\n# 6. Report final performance\ntest_metrics %&gt;%\n  filter(method == best_method) %&gt;%\n  select(method, f1_mean, f1_std)"
+  },
+  {
+    "objectID": "06_metrics_and_visualization.html#summary",
+    "href": "06_metrics_and_visualization.html#summary",
+    "title": "Metrics and Visualization",
+    "section": "9 Summary",
+    "text": "9 Summary\nGeneSelectR’s metrics framework:\n\nComputes standard classification metrics via scikit-learn\nAggregates scores across CV folds and test splits\nVisualizes performance via customizable ggplot2 plots\nGuides method selection through transparent reporting\n\nThe next chapter examines how to extract and interpret feature importances.\n\nNext: Feature Importance Estimation"
+  },
+  {
+    "objectID": "09_go_enrichment.html",
+    "href": "09_go_enrichment.html",
+    "title": "GO Enrichment Analysis",
+    "section": "",
+    "text": "Feature selection yields gene lists, but the ultimate goal is biological interpretation:\n\nWhat pathways are perturbed?\nWhat cellular processes are affected?\nAre findings consistent with known disease mechanisms?\n\nGene Ontology (GO) enrichment tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes)."
+  },
+  {
+    "objectID": "09_go_enrichment.html#from-genes-to-biology",
+    "href": "09_go_enrichment.html#from-genes-to-biology",
+    "title": "GO Enrichment Analysis",
+    "section": "",
+    "text": "Feature selection yields gene lists, but the ultimate goal is biological interpretation:\n\nWhat pathways are perturbed?\nWhat cellular processes are affected?\nAre findings consistent with known disease mechanisms?\n\nGene Ontology (GO) enrichment tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes)."
+  },
+  {
+    "objectID": "09_go_enrichment.html#go-basics",
+    "href": "09_go_enrichment.html#go-basics",
+    "title": "GO Enrichment Analysis",
+    "section": "2 GO Basics",
+    "text": "2 GO Basics\n\n2.1 Three Ontologies\n\nBiological Process (BP): High-level processes (e.g., “immune response”)\nMolecular Function (MF): Biochemical activities (e.g., “kinase activity”)\nCellular Component (CC): Subcellular locations (e.g., “mitochondrion”)\n\n\n\n2.2 Structure\nGO is a directed acyclic graph (DAG):\n\nTerms are nodes\nRelationships (is-a, part-of) are edges\nChild terms are more specific than parents\n\nExample:\nimmune system process (GO:0002376)\n  ├─ immune response (GO:0006955)\n  │   └─ T cell activation (GO:0042110)\n  └─ lymphocyte activation (GO:0046649)"
+  },
+  {
+    "objectID": "09_go_enrichment.html#enrichment-testing",
+    "href": "09_go_enrichment.html#enrichment-testing",
+    "title": "GO Enrichment Analysis",
+    "section": "3 Enrichment Testing",
+    "text": "3 Enrichment Testing\n\n3.1 Hypergeometric Test\nFor each GO term, test:\n\nk: Number of selected genes in term\nn: Total selected genes\nK: Number of background genes in term\nN: Total background genes\n\nNull hypothesis: Selected genes are randomly drawn from background.\np-value: Probability of observing ≥ k genes in term by chance.\n\n\n3.2 Multiple Testing Correction\nTesting thousands of terms requires correction:\n\nBonferroni: Extremely conservative (p &lt; 0.05 / n_terms)\nBenjamini-Hochberg (FDR): Less conservative, controls false discovery rate\nq-value: Similar to FDR, widely used in genomics\n\nGeneSelectR uses q &lt; 0.05 (FDR-adjusted) by default."
+  },
+  {
+    "objectID": "09_go_enrichment.html#running-enrichment-with-go_enrichment_analysis",
+    "href": "09_go_enrichment.html#running-enrichment-with-go_enrichment_analysis",
+    "title": "GO Enrichment Analysis",
+    "section": "4 Running Enrichment with GO_enrichment_analysis()",
+    "text": "4 Running Enrichment with GO_enrichment_analysis()\n\n4.1 Setup\n\nsuppressPackageStartupMessages({\n  library(clusterProfiler)\n  library(org.Hs.eg.db)\n})\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nannotated &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/AnnotatedGeneLists.rds\"))\nbackground &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/background.rds\"))\n\nExtract gene IDs:\n\n# Example: Lasso-selected genes (ENTREZID required for clusterProfiler)\nlasso_genes &lt;- annotated@inbuilt$Lasso@ENTREZID\ncat(\"Number of genes:\", length(lasso_genes), \"\\n\")\n\n\n\n4.2 Basic Enrichment\n\nlibrary(GeneSelectR)\n\nenrichment_results &lt;- GO_enrichment_analysis(\n  genes = lasso_genes,\n  background = background,  # Background gene IDs\n  ont = \"BP\",  # Biological Process\n  pAdjustMethod = \"BH\",  # Benjamini-Hochberg\n  pvalueCutoff = 0.05,\n  qvalueCutoff = 0.05\n)\n\n# Result is an enrichResult object from clusterProfiler\nhead(enrichment_results@result)\n\nKey columns:\n\nID: GO term ID\nDescription: Term name\nGeneRatio: k/n (genes in term / total selected)\nBgRatio: K/N (background genes in term / total background)\npvalue: Raw p-value\np.adjust: FDR-adjusted p-value\ngeneID: Gene symbols in term (separated by “/”)\n\n\n\n4.3 Enrichment for All Methods\n\nmethods &lt;- names(annotated@inbuilt)\n\nenrichment_list &lt;- lapply(methods, function(method) {\n  genes &lt;- annotated@inbuilt[[method]]@ENTREZID\n  GO_enrichment_analysis(genes, background, ont = \"BP\")\n})\nnames(enrichment_list) &lt;- methods\n\n# Compare top terms per method\nlapply(enrichment_list, function(res) head(res@result$Description, 5))"
+  },
+  {
+    "objectID": "09_go_enrichment.html#visualization",
+    "href": "09_go_enrichment.html#visualization",
+    "title": "GO Enrichment Analysis",
+    "section": "5 Visualization",
+    "text": "5 Visualization\n\n5.1 Dot Plot\n\ndotplot(enrichment_results, showCategory = 20)\n\nShows:\n\nx-axis: Gene ratio (fraction of selected genes in term)\nDot size: Number of genes in term\nDot color: Adjusted p-value\n\n\n\n5.2 Bar Plot\n\nbarplot(enrichment_results, showCategory = 15)\n\nSimpler alternative to dot plot.\n\n\n5.3 Network Plot\n\n# Requires enrichplot package\nlibrary(enrichplot)\ncnetplot(enrichment_results, categorySize = \"pvalue\", foldChange = NULL)\n\nShows gene-term network (which genes belong to which terms)."
+  },
+  {
+    "objectID": "09_go_enrichment.html#go-term-simplification",
+    "href": "09_go_enrichment.html#go-term-simplification",
+    "title": "GO Enrichment Analysis",
+    "section": "6 GO Term Simplification",
+    "text": "6 GO Term Simplification\n\n6.1 The Redundancy Problem\nGO terms are hierarchical and overlapping:\n\n“immune response” and “adaptive immune response” share many genes\nReporting both clutters results\n\nSolution: Simplify to non-redundant representative terms.\n\n\n6.2 Using run_simplify_enrichment()\n\n# Load enrichment result fixture\nenrich_obj &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/EnrichGO.rds\"))\n\nsimplified &lt;- run_simplify_enrichment(\n  enrich_obj,\n  measure = \"Wang\",  # Semantic similarity measure\n  threshold = 0.7    # Terms with similarity &gt; 0.7 clustered together\n)\n\n# Result: clustered terms with representative term per cluster\nhead(simplified)\n\n\n\n6.3 Batch Simplification with run_multiple_simplifyGO()\n\n# Simplify enrichments for all methods\nsimplified_list &lt;- run_multiple_simplifyGO(\n  enrichment_list,\n  cutoff = 0.7,\n  by = \"p.adjust\",\n  measure = \"Wang\"\n)\n\n# Compare simplified terms across methods\nlapply(simplified_list, function(df) df$Description[1:5])"
+  },
+  {
+    "objectID": "09_go_enrichment.html#child-term-metrics",
+    "href": "09_go_enrichment.html#child-term-metrics",
+    "title": "GO Enrichment Analysis",
+    "section": "7 Child Term Metrics",
+    "text": "7 Child Term Metrics\n\n7.1 Concept\nGO parent terms can be overly broad (“metabolic process”). Child term enrichment refines interpretation by testing specific subtypes.\n\n\n7.2 Using compute_GO_child_term_metrics()\n\n# For a broad parent term, compute child enrichments\nchild_results &lt;- compute_GO_child_term_metrics(\n  parent_term = \"GO:0006955\",  # immune response\n  genes = lasso_genes,\n  background = background,\n  org_db = org.Hs.eg.db\n)\n\n# Result: enrichment of child terms under the parent\nhead(child_results)\n\nReveals which specific immune processes are enriched."
+  },
+  {
+    "objectID": "09_go_enrichment.html#design-rationale",
+    "href": "09_go_enrichment.html#design-rationale",
+    "title": "GO Enrichment Analysis",
+    "section": "8 Design Rationale",
+    "text": "8 Design Rationale\n\n8.1 Why ENTREZID?\nclusterProfiler requires Entrez IDs because:\n\nStable across annotation updates\nDirect mapping to GO annotations in Bioconductor org.db packages\n\nGeneSelectR converts symbols → ENTREZID via annotate_gene_lists().\n\n\n8.2 Why Background Matters\nWrong: Test against all genes in the genome\nRight: Test against genes on your assay platform (e.g., microarray probes, RNA-seq detected genes)\nUsing the wrong background inflates p-values (genes not assayed can’t be selected).\n\n\n8.3 Why Simplify Terms?\nRaw enrichment results often contain:\n\n100+ significant terms (overwhelming)\nHighly redundant terms (e.g., “T cell activation” and “regulation of T cell activation”)\n\nSimplification reduces redundancy while preserving biological insights."
+  },
+  {
+    "objectID": "09_go_enrichment.html#troubleshooting",
+    "href": "09_go_enrichment.html#troubleshooting",
+    "title": "GO Enrichment Analysis",
+    "section": "9 Troubleshooting",
+    "text": "9 Troubleshooting\n\n9.1 “No enrichment found”\nPossible causes:\n\nToo few genes: &lt;10 genes may lack power\nWrong background: Background doesn’t overlap selected genes\nStringent cutoffs: Relax qvalueCutoff to 0.10\n\n\n# Check background overlap\nlength(intersect(lasso_genes, background))  # Should be close to length(lasso_genes)\n\n# Relax cutoffs\nGO_enrichment_analysis(lasso_genes, background, qvalueCutoff = 0.10)\n\n\n\n9.2 “Multiple testing correction too harsh”\nFor exploratory analysis:\n\nGO_enrichment_analysis(lasso_genes, background, pAdjustMethod = \"none\")\n# WARNING: Increases false positives; use cautiously"
+  },
+  {
+    "objectID": "09_go_enrichment.html#example-workflow",
+    "href": "09_go_enrichment.html#example-workflow",
+    "title": "GO Enrichment Analysis",
+    "section": "10 Example Workflow",
+    "text": "10 Example Workflow\n\n# 1. Run feature selection\nresults &lt;- perform_grid_search(X, y, ...)\n\n# 2. Annotate gene lists\nannotated &lt;- annotate_gene_lists(results, species = \"Homo.sapiens\")\n\n# 3. Define background (all genes assayed)\nbackground &lt;- colnames(X)  # Or load from fixture\n\n# 4. Enrichment for each method\nmethods &lt;- names(annotated@inbuilt)\nenrichments &lt;- lapply(methods, function(m) {\n  genes &lt;- annotated@inbuilt[[m]]@ENTREZID\n  GO_enrichment_analysis(genes, background, ont = \"BP\")\n})\nnames(enrichments) &lt;- methods\n\n# 5. Simplify redundant terms\nsimplified &lt;- run_multiple_simplifyGO(enrichments, cutoff = 0.7)\n\n# 6. Visualize\ndotplot(enrichments$Lasso, showCategory = 20)\n\n# 7. Export results\nwrite.csv(simplified$Lasso, \"lasso_go_enrichment.csv\")"
+  },
+  {
+    "objectID": "09_go_enrichment.html#interpretation-tips",
+    "href": "09_go_enrichment.html#interpretation-tips",
+    "title": "GO Enrichment Analysis",
+    "section": "11 Interpretation Tips",
+    "text": "11 Interpretation Tips\n\n11.1 Concordance Across Methods\nIf multiple methods enrich similar GO terms:\n\nStrong signal: Biological process is robustly associated with phenotype\nConfidence: Results less likely to be spurious\n\n\n\n11.2 Method-Specific Enrichments\nIf only one method enriches a term:\n\nMay be real: Method captures unique signal (e.g., LASSO finds linear drivers)\nMay be noise: Validate with external data or literature\n\n\n\n11.3 Pathway Coherence\nSelected genes should form coherent pathways:\n\nGood: Genes in “T cell activation” interact in known networks\nSuspicious: Genes have no known interactions (may be false positives)\n\nUse tools like STRING or GeneMANIA to validate."
+  },
+  {
+    "objectID": "09_go_enrichment.html#summary",
+    "href": "09_go_enrichment.html#summary",
+    "title": "GO Enrichment Analysis",
+    "section": "12 Summary",
+    "text": "12 Summary\nGeneSelectR’s GO enrichment pipeline:\n\nAnnotates selected genes (symbol → ENTREZID)\nTests for overrepresentation in GO terms (hypergeometric test)\nSimplifies redundant terms (semantic similarity clustering)\nVisualizes enrichments (dot plots, bar plots, networks)\n\nThe next chapter demonstrates an end-to-end workflow on real data.\n\nNext: End-to-End Demo"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html",
+    "href": "10_end_to_end_demo.html",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "",
+    "text": "Goal: Identify gene signatures distinguishing two biological conditions using a subset of gene expression data.\nData: UrbanRandomSubset fixture containing:\n\nExpression matrix (samples × genes)\nClass labels (e.g., control vs. disease)\n\nWorkflow:\n\nEnvironment setup\nData preprocessing\nFeature selection with multiple methods\nPerformance evaluation\nFeature importance extraction\nGene set overlap analysis\nGO enrichment interpretation\n\nThis demo uses small fixture data to ensure fast rendering. For production analyses, scale up sample sizes and feature counts."
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#scenario",
+    "href": "10_end_to_end_demo.html#scenario",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "",
+    "text": "Goal: Identify gene signatures distinguishing two biological conditions using a subset of gene expression data.\nData: UrbanRandomSubset fixture containing:\n\nExpression matrix (samples × genes)\nClass labels (e.g., control vs. disease)\n\nWorkflow:\n\nEnvironment setup\nData preprocessing\nFeature selection with multiple methods\nPerformance evaluation\nFeature importance extraction\nGene set overlap analysis\nGO enrichment interpretation\n\nThis demo uses small fixture data to ensure fast rendering. For production analyses, scale up sample sizes and feature counts."
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-1-environment-setup",
+    "href": "10_end_to_end_demo.html#step-1-environment-setup",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "2 Step 1: Environment Setup",
+    "text": "2 Step 1: Environment Setup\n\n2.1 Load Required Packages\n\nsuppressPackageStartupMessages({\n  library(GeneSelectR)\n  library(tidyverse)\n  library(reticulate)\n})\n\n# Set seed for reproducibility\nset.seed(42)\n\n\n\n2.2 Configure Python Environment\n\n# Point to uv-managed venv (adjust path as needed)\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nvenv_path &lt;- file.path(project_root, \".venv\")\n\nuse_python(file.path(venv_path, \"bin\", \"python\"), required = TRUE)\npy_config()\n\nNote: In practice, run this once per session. For rendering, assume environment is pre-configured.\n\n\n2.3 Import Python Modules\n\nimport_python_packages()\nmodules &lt;- define_sklearn_modules()"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-2-load-and-inspect-data",
+    "href": "10_end_to_end_demo.html#step-2-load-and-inspect-data",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "3 Step 2: Load and Inspect Data",
+    "text": "3 Step 2: Load and Inspect Data\n\n# Load fixture\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\ndata_path &lt;- file.path(project_root, \"tests/testthat/fixtures/UrbanRandomSubset.rda\")\nload(data_path)\n\n# Extract components (first column is treatment/group, rest are features)\ny &lt;- UrbanRandomSubset[, 1]\nX &lt;- as.matrix(UrbanRandomSubset[, -1])\n\n# Convert character matrix to numeric\nfor(i in 1:ncol(X)) {\n  X[, i] &lt;- as.numeric(X[, i])\n}\n\n# Dimensions\ncat(\"Samples:\", nrow(X), \"\\n\")\ncat(\"Features:\", ncol(X), \"\\n\")\ncat(\"Classes:\", table(y), \"\\n\")\n\n\n3.1 Data Structure\n\n# First 5 samples, first 5 features\nX[1:5, 1:5]\n\n# Class distribution\nbarplot(table(y), col = c(\"skyblue\", \"salmon\"), \n        main = \"Sample Distribution\", xlab = \"Class\", ylab = \"Count\")\n\n\n\n3.2 Train-Test Split\n\n# 70-30 split\nn &lt;- nrow(X)\ntrain_idx &lt;- sample(1:n, size = 0.7 * n)\n\nX_train &lt;- X[train_idx, ]\ny_train &lt;- y[train_idx]\nX_test &lt;- X[-train_idx, ]\ny_test &lt;- y[-train_idx]\n\ncat(\"Training samples:\", nrow(X_train), \"\\n\")\ncat(\"Test samples:\", nrow(X_test), \"\\n\")"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-3-configure-feature-selection",
+    "href": "10_end_to_end_demo.html#step-3-configure-feature-selection",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "4 Step 3: Configure Feature Selection",
+    "text": "4 Step 3: Configure Feature Selection\n\n4.1 Set Parameters\n\nmax_features &lt;- 50  # Maximum genes to select\n\n# Define preprocessing and feature selection methods\nfs_setup &lt;- set_default_fs_methods(modules, max_features, random_state = 42)\n\npreprocessing_steps &lt;- fs_setup$preprocessing_steps\nfs_methods &lt;- fs_setup$default_feature_selection_methods\n\n# Define parameter grids\nparam_grids &lt;- set_default_param_grids(max_features)\n\n\n\n4.2 Create Pipelines\n\n# Classifier for evaluation\nclassifier &lt;- modules$GradBoost(random_state = 42)\n\n# Build pipelines\npipelines &lt;- create_pipelines(\n  preprocessing_steps = preprocessing_steps,\n  fs_methods = fs_methods,\n  classifier = classifier,\n  modules = modules\n)\n\ncat(\"Pipelines created:\", names(pipelines), \"\\n\")"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-4-run-grid-search",
+    "href": "10_end_to_end_demo.html#step-4-run-grid-search",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "5 Step 4: Run Grid Search",
+    "text": "5 Step 4: Run Grid Search\nNote: Set eval=FALSE for quick rendering; run interactively for real results.\n\nresults &lt;- perform_grid_search(\n  pipelines = pipelines,\n  param_grids = param_grids,\n  X = X_train,\n  y = y_train,\n  cv = 3,  # 3-fold CV (faster for demo)\n  scoring = \"f1_weighted\",\n  random_state = 42,\n  calculate_permutation_importance = TRUE,  # Include permutation importance\n  n_jobs = 2  # Limit parallelism for demo\n)\n\n# Save results for reproducibility\nsaveRDS(results, \"demo_results.rds\")\n\nFor this demo, use pre-computed results:\n\nresults &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/PipelineResults.rds\"))"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-5-evaluate-performance",
+    "href": "10_end_to_end_demo.html#step-5-evaluate-performance",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "6 Step 5: Evaluate Performance",
+    "text": "6 Step 5: Evaluate Performance\n\n6.1 Cross-Validation Scores\n\ncv_scores &lt;- results@cv_mean_score %&gt;%\n  arrange(desc(mean_score))\n\nprint(cv_scores)\n\nBest method: (see results above) with highest mean score.\n\n\n6.2 Test Set Evaluation\n\n# Evaluate on held-out test set\ntest_metrics &lt;- evaluate_test_metrics(results, X_test, y_test)\n\n# Visualize\nplot_metrics(results, metric_type = \"test\", color_palette = \"Set1\")"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-6-feature-importance",
+    "href": "10_end_to_end_demo.html#step-6-feature-importance",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "7 Step 6: Feature Importance",
+    "text": "7 Step 6: Feature Importance\n\n7.1 Extract Top Features\n\n# Top 20 features (inbuilt importance)\nbest_method &lt;- cv_scores$method[1]\n\nif (!is.null(results@inbuilt_feature_importance[[best_method]])) {\n  top_features &lt;- results@inbuilt_feature_importance[[best_method]] %&gt;%\n    sort(decreasing = TRUE) %&gt;%\n    head(20)\n  \n  cat(\"Top 20 features for\", best_method, \":\\n\")\n  print(names(top_features))\n} else {\n  cat(\"Inbuilt importance not available\\n\")\n}\n\n\n\n7.2 Visualize Importance\n\nplot_feature_importance(\n  results,\n  method = best_method,\n  importance_type = \"inbuilt\",\n  top_n = 20,\n  color = \"steelblue\"\n)\n\n\n\n7.3 Compare Inbuilt vs Permutation\n\n# If permutation importance was computed\nif (length(results@permutation_importance) &gt; 0) {\n  p1 &lt;- plot_feature_importance(results, best_method, \"inbuilt\", top_n = 15)\n  p2 &lt;- plot_feature_importance(results, best_method, \"permutation\", top_n = 15)\n  \n  library(patchwork)\n  p1 + p2 + plot_layout(ncol = 2)\n}"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-7-gene-set-overlap",
+    "href": "10_end_to_end_demo.html#step-7-gene-set-overlap",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "8 Step 7: Gene Set Overlap",
+    "text": "8 Step 7: Gene Set Overlap\n\n8.1 Extract Gene Lists\n\n# Annotate gene lists (requires org.db packages)\nannotated &lt;- annotate_gene_lists(\n  results,\n  species = \"Homo.sapiens\",\n  keytype = \"ENSEMBL\",\n  top_n = 50\n)\n\n# Gene lists per method (symbols)\ngene_lists &lt;- lapply(annotated@inbuilt, function(gl) gl@SYMBOL)\n\nFor demo, use pre-annotated fixture:\n\nannotated &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/AnnotatedGeneLists.rds\"))\ngene_lists &lt;- lapply(annotated@inbuilt, function(gl) gl@SYMBOL)\n\n# Number of genes per method\nsapply(gene_lists, length)\n\n\n\n8.2 Compute Overlap\n\noverlap_matrix &lt;- calculate_overlap_coefficients(\n  gene_lists,\n  coefficient = \"jaccard\"\n)\n\n# Heatmap\nplot_overlap_heatmaps(\n  overlap_matrix,\n  title = \"Gene Set Overlap (Jaccard Index)\",\n  color_palette = \"YlOrRd\"\n)\n\n\n\n8.3 UpSet Plot\n\nplot_upset(\n  gene_lists,\n  nsets = length(gene_lists),\n  order.by = \"freq\"\n)\n\nInterpretation: Identify consensus genes selected by multiple methods."
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-8-go-enrichment",
+    "href": "10_end_to_end_demo.html#step-8-go-enrichment",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "9 Step 8: GO Enrichment",
+    "text": "9 Step 8: GO Enrichment\n\n9.1 Define Background\n\n# Background = all features assayed\nbackground &lt;- colnames(X)\n\nFor demo, use pre-defined background:\n\nbackground &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/background.rds\"))\n\n\n\n9.2 Run Enrichment\n\n# Enrichment for best method\nbest_genes &lt;- annotated@inbuilt[[best_method]]@ENTREZID\n\nenrichment &lt;- GO_enrichment_analysis(\n  genes = best_genes,\n  background = background,\n  ont = \"BP\",  # Biological Process\n  pAdjustMethod = \"BH\",\n  qvalueCutoff = 0.05\n)\n\n# Top enriched terms\nhead(enrichment@result[, c(\"Description\", \"pvalue\", \"p.adjust\", \"Count\")])\n\n\n\n9.3 Visualize Enrichment\n\n# Dot plot\ndotplot(enrichment, showCategory = 20, font.size = 10)\n\n# Bar plot\nbarplot(enrichment, showCategory = 15)\n\n\n\n9.4 Simplify Redundant Terms\n\nsimplified &lt;- run_simplify_enrichment(\n  enrichment,\n  measure = \"Wang\",\n  threshold = 0.7\n)\n\n# Representative terms\nhead(simplified$Description)"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#step-9-reporting-and-export",
+    "href": "10_end_to_end_demo.html#step-9-reporting-and-export",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "10 Step 9: Reporting and Export",
+    "text": "10 Step 9: Reporting and Export\n\n10.1 Summary Statistics\n\ncat(\"=== Analysis Summary ===\\n\")\ncat(\"Dataset:\", \"UrbanRandomSubset\\n\")\ncat(\"Training samples:\", nrow(X_train), \"\\n\")\ncat(\"Test samples:\", nrow(X_test), \"\\n\")\ncat(\"Features:\", ncol(X), \"\\n\")\ncat(\"Best method:\", \"(see results above)\", \"\\n\")\ncat(\"Best CV score:\", \"(see results above)\", \"\\n\")\ncat(\"Selected features:\", length(top_features), \"\\n\")\n\n\n\n10.2 Export Results\n\n# Save results\nsaveRDS(results, \"pipeline_results.rds\")\nsaveRDS(annotated, \"annotated_gene_lists.rds\")\n\n# Export gene lists\nfor (method in names(gene_lists)) {\n  write.csv(\n    data.frame(Gene = gene_lists[[method]]),\n    file = paste0(method, \"_genes.csv\"),\n    row.names = FALSE\n  )\n}\n\n# Export enrichment\nwrite.csv(enrichment@result, \"go_enrichment.csv\", row.names = FALSE)"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#design-decisions-recap",
+    "href": "10_end_to_end_demo.html#design-decisions-recap",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "11 Design Decisions Recap",
+    "text": "11 Design Decisions Recap\n\n11.1 Why Multiple Methods?\nDifferent algorithms capture different patterns:\n\nLASSO: Linear, sparse\nRandom Forest: Non-linear, interactions\nUnivariate: Fast, marginal effects\nBoruta: Comprehensive, all-relevant\n\nConsensus across methods increases confidence.\n\n\n11.2 Why Cross-Validation?\n\nEstimates generalization performance\nReduces overfitting risk\nProvides uncertainty quantification (std)\n\n\n\n11.3 Why GO Enrichment?\n\nTranslates gene lists into biological insights\nValidates findings against established knowledge\nGuides follow-up experiments"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#next-steps-beyond-demo",
+    "href": "10_end_to_end_demo.html#next-steps-beyond-demo",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "12 Next Steps (Beyond Demo)",
+    "text": "12 Next Steps (Beyond Demo)\n\nIncrease sample size: More robust signatures\nExternal validation: Test on independent cohorts\nStability analysis: Bootstrap resampling\nPathway analysis: KEGG, Reactome\nNetwork analysis: Protein-protein interactions\nClinical validation: Experimental confirmation"
+  },
+  {
+    "objectID": "10_end_to_end_demo.html#summary",
+    "href": "10_end_to_end_demo.html#summary",
+    "title": "End-to-End Demo: Reproducible Workflow",
+    "section": "13 Summary",
+    "text": "13 Summary\nThis end-to-end workflow demonstrates:\n\nEnvironment setup with uv and reticulate\nPipeline creation with multiple feature selection methods\nHyperparameter optimization via grid search\nPerformance evaluation on CV and test sets\nFeature importance extraction and visualization\nGene set overlap analysis\nGO enrichment for biological interpretation\n\nAll steps are reproducible via Quarto caching and fixed random seeds.\n\nNext: Synthesis: Design and Extensions"
+  },
+  {
+    "objectID": "04_python_integration.html",
+    "href": "04_python_integration.html",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "",
+    "text": "GeneSelectR uses reticulate to call Python code from R. Unlike system calls or JSON-based APIs, reticulate:\n\nImports Python modules as R objects\nConverts data structures bidirectionally (data.frame ↔︎ pandas DataFrame, list ↔︎ dict)\nPreserves object references across language boundaries\nHandles errors by translating Python exceptions to R errors\n\nThis enables seamless workflows like:\n\n# Import Python module\nsklearn &lt;- reticulate::import(\"sklearn\")\n\n# Call Python function with R data\nmodel &lt;- sklearn$ensemble$RandomForestClassifier(n_estimators = 100L)\n\n# Python object methods accessible via $\nmodel$fit(X_train, y_train)\npredictions &lt;- model$predict(X_test)"
+  },
+  {
+    "objectID": "04_python_integration.html#the-reticulate-bridge",
+    "href": "04_python_integration.html#the-reticulate-bridge",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "",
+    "text": "GeneSelectR uses reticulate to call Python code from R. Unlike system calls or JSON-based APIs, reticulate:\n\nImports Python modules as R objects\nConverts data structures bidirectionally (data.frame ↔︎ pandas DataFrame, list ↔︎ dict)\nPreserves object references across language boundaries\nHandles errors by translating Python exceptions to R errors\n\nThis enables seamless workflows like:\n\n# Import Python module\nsklearn &lt;- reticulate::import(\"sklearn\")\n\n# Call Python function with R data\nmodel &lt;- sklearn$ensemble$RandomForestClassifier(n_estimators = 100L)\n\n# Python object methods accessible via $\nmodel$fit(X_train, y_train)\npredictions &lt;- model$predict(X_test)"
+  },
+  {
+    "objectID": "04_python_integration.html#geneselectrs-python-modules",
+    "href": "04_python_integration.html#geneselectrs-python-modules",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "2 GeneSelectR’s Python Modules",
+    "text": "2 GeneSelectR’s Python Modules\nThe package defines four Python modules in inst/python/:\n\nGeneSelectR.py: Core pipeline execution\nfit_and_evaluate_pipelines.py: Test set evaluation\ngeneset_stability.py: Bootstrap stability analysis\ncorrelation_filter.py: Feature preprocessing\n\nThese are imported and called by R wrapper functions."
+  },
+  {
+    "objectID": "04_python_integration.html#module-import-workflow",
+    "href": "04_python_integration.html#module-import-workflow",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "3 Module Import Workflow",
+    "text": "3 Module Import Workflow\n\n3.1 Step 1: Import at Package Load\nR/import_python_packages.R defines the import logic:\n\nimport_python_packages &lt;- function() {\n  \n  sklearn &lt;&lt;- reticulate::import(\"sklearn\", delay_load = TRUE)\n  np &lt;&lt;- reticulate::import(\"numpy\", delay_load = TRUE)\n  skopt &lt;&lt;- reticulate::import(\"skopt\", delay_load = TRUE)\n  boruta &lt;&lt;- reticulate::import(\"boruta\", delay_load = TRUE)\n  sys &lt;&lt;- reticulate::import(\"sys\", delay_load = TRUE)\n  multiprocessing &lt;&lt;- reticulate::import(\"multiprocessing\", delay_load = TRUE)\n  \n  # Import custom modules from inst/python\n  GeneSelectR_py &lt;&lt;- reticulate::import_from_path(\n    \"GeneSelectR\", \n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  fit_and_evaluate &lt;&lt;- reticulate::import_from_path(\n    \"fit_and_evaluate_pipelines\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  geneset_stability_py &lt;&lt;- reticulate::import_from_path(\n    \"geneset_stability\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  correlation_filter &lt;&lt;- reticulate::import_from_path(\n    \"correlation_filter\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n}\n\nKey details:\n\ndelay_load = TRUE: Postpones import until first use (faster package load)\nimport_from_path(): Loads local .py files (not installed packages)\n&lt;&lt;-: Assigns to package namespace (global within package)\n\n\n\n3.2 Step 2: Module Availability Check\nBefore calling Python functions, verify modules exist:\n\nif (!reticulate::py_module_available(\"sklearn\")) {\n  stop(\"scikit-learn not found. Install with: uv pip install scikit-learn\")\n}\n\nGeneSelectR includes skip_if_no_modules() for conditional test execution."
+  },
+  {
+    "objectID": "04_python_integration.html#data-type-conversion",
+    "href": "04_python_integration.html#data-type-conversion",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "4 Data Type Conversion",
+    "text": "4 Data Type Conversion\n\n4.1 R → Python\n\n\n\n\n\n\n\n\nR Type\nPython Type\nNotes\n\n\n\n\nnumeric\nnumpy.ndarray\nAlways converted to arrays\n\n\ninteger\nint or np.int64\nUse 100L for explicit int\n\n\ncharacter\nstr\nDirect mapping\n\n\nlist\nlist\nRecursive conversion\n\n\ndata.frame\npandas.DataFrame\nColumn names preserved\n\n\nmatrix\nnumpy.ndarray\nRow-major to column-major flip\n\n\n\nCritical: scikit-learn expects integer labels, not strings. GeneSelectR converts:\n\n# R factor → Python int array\ny_labels &lt;- as.integer(factor(y)) - 1L  # 0-indexed\n\n\n\n4.2 Python → R\n\n\n\nPython Type\nR Type\nNotes\n\n\n\n\nnp.ndarray\nmatrix/array\nDepends on dimensions\n\n\npd.DataFrame\ndata.frame\nIndex becomes row names\n\n\ndict\nlist\nNamed list\n\n\nlist\nlist\nDirect mapping\n\n\nNone\nNULL\nDirect mapping\n\n\n\nGotcha: Python 0-indexed arrays become 1-indexed R vectors. GeneSelectR handles this in feature importance extraction."
+  },
+  {
+    "objectID": "04_python_integration.html#calling-python-functions-from-r",
+    "href": "04_python_integration.html#calling-python-functions-from-r",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "5 Calling Python Functions from R",
+    "text": "5 Calling Python Functions from R\n\n5.1 Example 1: define_sklearn_modules()\nThis R function wraps Python imports:\n\ndefine_sklearn_modules &lt;- function() {\n  preprocessing &lt;- sklearn$preprocessing\n  model_selection &lt;- sklearn$model_selection\n  feature_selection &lt;- sklearn$feature_selection\n  ensemble &lt;- sklearn$ensemble\n  \n  forest &lt;- sklearn$ensemble$RandomForestClassifier\n  lasso &lt;- sklearn$linear_model$LogisticRegression\n  \n  return(list(\n    preprocessing = preprocessing,\n    forest = forest,\n    lasso = lasso,\n    ...\n  ))\n}\n\nReturns a list of Python class references (not instances).\n\n\n5.2 Example 2: create_pipelines()\nBuilds scikit-learn Pipeline objects:\n\ncreate_pipelines &lt;- function(preprocessing_steps, fs_methods, classifier, modules) {\n  pipelines &lt;- list()\n  \n  for (method_name in names(fs_methods)) {\n    steps &lt;- c(\n      preprocessing_steps,\n      list(feature_selector = fs_methods[[method_name]]),\n      list(classifier = classifier)\n    )\n    \n    # Call Python Pipeline constructor\n    pipeline &lt;- modules$pipeline$Pipeline(steps = steps)\n    pipelines[[method_name]] &lt;- pipeline\n  }\n  \n  return(pipelines)\n}\n\nThe resulting list contains Python Pipeline objects, ready for .fit().\n\n\n5.3 Example 3: perform_grid_search()\nCalls custom Python function:\n\nperform_grid_search &lt;- function(pipelines, param_grids, X, y, ...) {\n  # Convert R data to Python-compatible format\n  X_py &lt;- r_to_py(X)\n  y_py &lt;- r_to_py(as.integer(y) - 1L)\n  \n  # Call inst/python/GeneSelectR.py function\n  results &lt;- GeneSelectR_py$perform_grid_search_with_feature_importance(\n    pipelines = pipelines,\n    param_grids = param_grids,\n    X = X_py,\n    y = y_py,\n    cv = 5L,\n    n_jobs = -1L\n  )\n  \n  # Results is a Python dict; accessible as R list\n  return(results)\n}"
+  },
+  {
+    "objectID": "04_python_integration.html#design-decisions",
+    "href": "04_python_integration.html#design-decisions",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "6 Design Decisions",
+    "text": "6 Design Decisions\n\n6.1 Why Not Pure Python?\nKeeping R as the primary interface:\n\nLeverages Bioconductor for GO enrichment (no Python equivalent)\nFamiliar to bioinformaticians already using R\nEasier integration with R Markdown/Quarto for reports\n\n\n\n6.2 Why Not Pure R?\nDelegating ML to Python:\n\nscikit-learn is more mature than R’s caret/tidymodels for this use case\nFaster execution (compiled C/C++ backends)\nBoruta implementation only available in Python\n\n\n\n6.3 Why Not Just Call Scripts?\nreticulate is superior to system(\"python script.py\") because:\n\nNo file I/O overhead (direct memory sharing)\nBetter error handling (Python tracebacks visible in R)\nInteractive debugging (inspect Python objects in R session)"
+  },
+  {
+    "objectID": "04_python_integration.html#troubleshooting",
+    "href": "04_python_integration.html#troubleshooting",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "7 Troubleshooting",
+    "text": "7 Troubleshooting\n\n7.1 “Module not found” despite installation\n\n# Verify Python interpreter\nreticulate::py_config()\n\n# Check sys.path\nreticulate::py_run_string(\"import sys; print(sys.path)\")\n\n# Manually add path\nreticulate::py_run_string(\"sys.path.append('/path/to/packages')\")\n\n\n\n7.2 “Conversion not possible”\n\n# Force conversion to NumPy array\nX_py &lt;- reticulate::np_array(as.matrix(X))\n\n# Force integer type\ny_py &lt;- reticulate::np_array(as.integer(y), dtype = \"int32\")\n\n\n\n7.3 “AttributeError: module has no attribute X”\nLikely a delayed load issue. Force import:\n\nsklearn &lt;- reticulate::import(\"sklearn\", delay_load = FALSE)"
+  },
+  {
+    "objectID": "04_python_integration.html#performance-considerations",
+    "href": "04_python_integration.html#performance-considerations",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "8 Performance Considerations",
+    "text": "8 Performance Considerations\n\n8.1 Memory Copying\nreticulate copies data between R and Python by default. For large datasets:\n\n# Before: 10GB matrix → 20GB total memory (R + Python)\nX_py &lt;- r_to_py(X)\n\n# Consider chunking if memory-constrained\n\n\n\n8.2 Parallelization\nscikit-learn’s n_jobs = -1 uses all CPU cores, but:\n\nOn Windows, requires special setup (enable_multiprocess())\nMay conflict with R’s parallel backends (avoid mixing)"
+  },
+  {
+    "objectID": "04_python_integration.html#summary",
+    "href": "04_python_integration.html#summary",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "9 Summary",
+    "text": "9 Summary\nGeneSelectR’s Python integration:\n\nImports modules via reticulate at package load\nConverts data types automatically (with type hints for sklearn)\nCalls Python functions as if they were R functions\nReturns results as R-native objects (lists, data.frames)\n\nThis architecture allows Python-based ML pipelines to integrate seamlessly into R-based bioinformatics workflows.\n\nNext: Feature Selection and Hyperparameter Search"
+  }
+]
