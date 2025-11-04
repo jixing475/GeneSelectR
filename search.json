@@ -1,52 +1,73 @@
 [
   {
-    "objectID": "01_overview.html",
-    "href": "01_overview.html",
-    "title": "Overview: A High-Level Map of GeneSelectR",
+    "objectID": "04_python_integration.html",
+    "href": "04_python_integration.html",
+    "title": "Python Integration: R ↔︎ Python Interface",
     "section": "",
-    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
+    "text": "GeneSelectR uses reticulate to call Python code from R. Unlike system calls or JSON-based APIs, reticulate:\n\nImports Python modules as R objects\nConverts data structures bidirectionally (data.frame ↔︎ pandas DataFrame, list ↔︎ dict)\nPreserves object references across language boundaries\nHandles errors by translating Python exceptions to R errors\n\nThis enables seamless workflows like:\n\n# Import Python module\nsklearn &lt;- reticulate::import(\"sklearn\")\n\n# Call Python function with R data\nmodel &lt;- sklearn$ensemble$RandomForestClassifier(n_estimators = 100L)\n\n# Python object methods accessible via $\nmodel$fit(X_train, y_train)\npredictions &lt;- model$predict(X_test)"
   },
   {
-    "objectID": "01_overview.html#what-geneselectr-solves",
-    "href": "01_overview.html#what-geneselectr-solves",
-    "title": "Overview: A High-Level Map of GeneSelectR",
+    "objectID": "04_python_integration.html#the-reticulate-bridge",
+    "href": "04_python_integration.html#the-reticulate-bridge",
+    "title": "Python Integration: R ↔︎ Python Interface",
     "section": "",
-    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
+    "text": "GeneSelectR uses reticulate to call Python code from R. Unlike system calls or JSON-based APIs, reticulate:\n\nImports Python modules as R objects\nConverts data structures bidirectionally (data.frame ↔︎ pandas DataFrame, list ↔︎ dict)\nPreserves object references across language boundaries\nHandles errors by translating Python exceptions to R errors\n\nThis enables seamless workflows like:\n\n# Import Python module\nsklearn &lt;- reticulate::import(\"sklearn\")\n\n# Call Python function with R data\nmodel &lt;- sklearn$ensemble$RandomForestClassifier(n_estimators = 100L)\n\n# Python object methods accessible via $\nmodel$fit(X_train, y_train)\npredictions &lt;- model$predict(X_test)"
   },
   {
-    "objectID": "01_overview.html#architecture-overview",
-    "href": "01_overview.html#architecture-overview",
-    "title": "Overview: A High-Level Map of GeneSelectR",
-    "section": "2 Architecture Overview",
-    "text": "2 Architecture Overview\n\n2.1 R Components (R/)\nThe R layer provides:\n\nCore workflow orchestration (GeneSelectR.R):\n\ndefine_sklearn_modules(): Bridge to Python ML modules\nset_default_fs_methods(): Configure feature selection methods\ncreate_pipelines(): Build scikit-learn pipelines via reticulate\nperform_grid_search(): Execute hyperparameter optimization\n\nS4 class system (classes.R):\n\nPipelineResults: Container for CV results, feature importances, metrics\nGeneList: Gene identifiers (SYMBOL, ENSEMBL, ENTREZID)\nAnnotatedGeneLists: Collection of gene lists per method\n\nEvaluation and visualization:\n\ncalculate_mean_cv_scores(), evaluate_test_metrics(): Performance metrics\nplot_metrics(), plot_feature_importance(): Diagnostic plots\ncalculate_overlap_coefficients(), plot_overlap_heatmaps(): Gene set comparison\n\nBioinformatics integration:\n\nGO_enrichment_analysis(): clusterProfiler-based enrichment\nrun_simplify_enrichment(), run_multiple_simplifyGO(): GO term simplification\nannotate_gene_lists(): Convert symbols to IDs\n\n\n\n\n2.2 Python Components (inst/python/)\nPython modules handle computationally intensive tasks:\n\nGeneSelectR.py: Core pipeline execution\n\nGrid search with cross-validation\nFeature importance calculation\nModel training and evaluation\n\nfit_and_evaluate_pipelines.py: Test set evaluation\n\nOut-of-sample performance metrics\nStandardized scoring across methods\n\ngeneset_stability.py: Stability analysis\n\nFeature selection across bootstrap samples\nJaccard index for gene set overlap\n\ncorrelation_filter.py: Preprocessing utilities\n\nRedundancy removal via correlation thresholding"
+    "objectID": "04_python_integration.html#geneselectrs-python-modules",
+    "href": "04_python_integration.html#geneselectrs-python-modules",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "2 GeneSelectR’s Python Modules",
+    "text": "2 GeneSelectR’s Python Modules\nThe package defines four Python modules in inst/python/:\n\nGeneSelectR.py: Core pipeline execution\nfit_and_evaluate_pipelines.py: Test set evaluation\ngeneset_stability.py: Bootstrap stability analysis\ncorrelation_filter.py: Feature preprocessing\n\nThese are imported and called by R wrapper functions."
   },
   {
-    "objectID": "01_overview.html#data-flow",
-    "href": "01_overview.html#data-flow",
-    "title": "Overview: A High-Level Map of GeneSelectR",
-    "section": "3 Data Flow",
-    "text": "3 Data Flow\nInput Data (expression matrix + labels)\n    ↓\n[R] create_pipelines() → build sklearn Pipeline objects\n    ↓\n[Python] perform_grid_search() → hyperparameter optimization\n    ↓\n[R] PipelineResults object ← extract results via reticulate\n    ↓\n[R] get_feature_importances() → extract top genes\n    ↓\n[R] annotate_gene_lists() → map SYMBOL ↔ ENSEMBL ↔ ENTREZID\n    ↓\n[R] GO_enrichment_analysis() → functional interpretation"
+    "objectID": "04_python_integration.html#module-import-workflow",
+    "href": "04_python_integration.html#module-import-workflow",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "3 Module Import Workflow",
+    "text": "3 Module Import Workflow\n\n3.1 Step 1: Import at Package Load\nR/import_python_packages.R defines the import logic:\n\nimport_python_packages &lt;- function() {\n  \n  sklearn &lt;&lt;- reticulate::import(\"sklearn\", delay_load = TRUE)\n  np &lt;&lt;- reticulate::import(\"numpy\", delay_load = TRUE)\n  skopt &lt;&lt;- reticulate::import(\"skopt\", delay_load = TRUE)\n  boruta &lt;&lt;- reticulate::import(\"boruta\", delay_load = TRUE)\n  sys &lt;&lt;- reticulate::import(\"sys\", delay_load = TRUE)\n  multiprocessing &lt;&lt;- reticulate::import(\"multiprocessing\", delay_load = TRUE)\n  \n  # Import custom modules from inst/python\n  GeneSelectR_py &lt;&lt;- reticulate::import_from_path(\n    \"GeneSelectR\", \n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  fit_and_evaluate &lt;&lt;- reticulate::import_from_path(\n    \"fit_and_evaluate_pipelines\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  geneset_stability_py &lt;&lt;- reticulate::import_from_path(\n    \"geneset_stability\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  correlation_filter &lt;&lt;- reticulate::import_from_path(\n    \"correlation_filter\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n}\n\nKey details:\n\ndelay_load = TRUE: Postpones import until first use (faster package load)\nimport_from_path(): Loads local .py files (not installed packages)\n&lt;&lt;-: Assigns to package namespace (global within package)\n\n\n\n3.2 Step 2: Module Availability Check\nBefore calling Python functions, verify modules exist:\n\nif (!reticulate::py_module_available(\"sklearn\")) {\n  stop(\"scikit-learn not found. Install with: uv pip install scikit-learn\")\n}\n\nGeneSelectR includes skip_if_no_modules() for conditional test execution."
   },
   {
-    "objectID": "01_overview.html#key-design-decisions",
-    "href": "01_overview.html#key-design-decisions",
-    "title": "Overview: A High-Level Map of GeneSelectR",
-    "section": "4 Key Design Decisions",
-    "text": "4 Key Design Decisions\n\n4.1 Why R + Python?\n\nR: Rich bioinformatics infrastructure (clusterProfiler, org.db packages), flexible visualization (ggplot2)\nPython: Mature ML ecosystem (scikit-learn), efficient numerical computing\n\nThe reticulate package bridges the two environments with minimal overhead.\n\n\n4.2 Why S4 Classes?\nS4 provides:\n\nFormal slot definitions with type checking\nMethod dispatch for generic functions\nClear contracts for data structures\n\nThe PipelineResults class ensures all pipeline outputs adhere to a consistent schema.\n\n\n4.3 Why Multiple Feature Selection Methods?\nDifferent algorithms capture different aspects of feature relevance:\n\nLASSO: Linear dependencies via L1 regularization\nRandom Forest: Non-linear interactions via tree-based importance\nUnivariate: Marginal associations (fast, interpretable)\nBoruta: All-relevant features via shadow features\n\nEnsemble approaches often yield more robust signatures than single methods."
+    "objectID": "04_python_integration.html#data-type-conversion",
+    "href": "04_python_integration.html#data-type-conversion",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "4 Data Type Conversion",
+    "text": "4 Data Type Conversion\n\n4.1 R → Python\n\n\n\n\n\n\n\n\nR Type\nPython Type\nNotes\n\n\n\n\nnumeric\nnumpy.ndarray\nAlways converted to arrays\n\n\ninteger\nint or np.int64\nUse 100L for explicit int\n\n\ncharacter\nstr\nDirect mapping\n\n\nlist\nlist\nRecursive conversion\n\n\ndata.frame\npandas.DataFrame\nColumn names preserved\n\n\nmatrix\nnumpy.ndarray\nRow-major to column-major flip\n\n\n\nCritical: scikit-learn expects integer labels, not strings. GeneSelectR converts:\n\n# R factor → Python int array\ny_labels &lt;- as.integer(factor(y)) - 1L  # 0-indexed\n\n\n\n4.2 Python → R\n\n\n\nPython Type\nR Type\nNotes\n\n\n\n\nnp.ndarray\nmatrix/array\nDepends on dimensions\n\n\npd.DataFrame\ndata.frame\nIndex becomes row names\n\n\ndict\nlist\nNamed list\n\n\nlist\nlist\nDirect mapping\n\n\nNone\nNULL\nDirect mapping\n\n\n\nGotcha: Python 0-indexed arrays become 1-indexed R vectors. GeneSelectR handles this in feature importance extraction."
   },
   {
-    "objectID": "01_overview.html#reading-guide",
-    "href": "01_overview.html#reading-guide",
-    "title": "Overview: A High-Level Map of GeneSelectR",
-    "section": "5 Reading Guide",
-    "text": "5 Reading Guide\nSubsequent chapters follow the typical GeneSelectR workflow:\n\nSetup (Ch 2): Environment configuration with uv and reticulate\nCore (Ch 3-5): Class definitions, Python integration, pipeline mechanics\nAnalysis (Ch 6-9): Metrics, importance, overlap, and enrichment\nDemo (Ch 10): End-to-end reproducible example\nSynthesis (Ch 11): Design reflections and extensions\n\nEach chapter is self-contained with executable code chunks using test fixtures to ensure fast rendering."
+    "objectID": "04_python_integration.html#calling-python-functions-from-r",
+    "href": "04_python_integration.html#calling-python-functions-from-r",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "5 Calling Python Functions from R",
+    "text": "5 Calling Python Functions from R\n\n5.1 Example 1: define_sklearn_modules()\nThis R function wraps Python imports:\n\ndefine_sklearn_modules &lt;- function() {\n  preprocessing &lt;- sklearn$preprocessing\n  model_selection &lt;- sklearn$model_selection\n  feature_selection &lt;- sklearn$feature_selection\n  ensemble &lt;- sklearn$ensemble\n  \n  forest &lt;- sklearn$ensemble$RandomForestClassifier\n  lasso &lt;- sklearn$linear_model$LogisticRegression\n  \n  return(list(\n    preprocessing = preprocessing,\n    forest = forest,\n    lasso = lasso,\n    ...\n  ))\n}\n\nReturns a list of Python class references (not instances).\n\n\n5.2 Example 2: create_pipelines()\nBuilds scikit-learn Pipeline objects:\n\ncreate_pipelines &lt;- function(preprocessing_steps, fs_methods, classifier, modules) {\n  pipelines &lt;- list()\n  \n  for (method_name in names(fs_methods)) {\n    steps &lt;- c(\n      preprocessing_steps,\n      list(feature_selector = fs_methods[[method_name]]),\n      list(classifier = classifier)\n    )\n    \n    # Call Python Pipeline constructor\n    pipeline &lt;- modules$pipeline$Pipeline(steps = steps)\n    pipelines[[method_name]] &lt;- pipeline\n  }\n  \n  return(pipelines)\n}\n\nThe resulting list contains Python Pipeline objects, ready for .fit().\n\n\n5.3 Example 3: perform_grid_search()\nCalls custom Python function:\n\nperform_grid_search &lt;- function(pipelines, param_grids, X, y, ...) {\n  # Convert R data to Python-compatible format\n  X_py &lt;- r_to_py(X)\n  y_py &lt;- r_to_py(as.integer(y) - 1L)\n  \n  # Call inst/python/GeneSelectR.py function\n  results &lt;- GeneSelectR_py$perform_grid_search_with_feature_importance(\n    pipelines = pipelines,\n    param_grids = param_grids,\n    X = X_py,\n    y = y_py,\n    cv = 5L,\n    n_jobs = -1L\n  )\n  \n  # Results is a Python dict; accessible as R list\n  return(results)\n}"
   },
   {
-    "objectID": "01_overview.html#entry-points-for-code-exploration",
-    "href": "01_overview.html#entry-points-for-code-exploration",
-    "title": "Overview: A High-Level Map of GeneSelectR",
-    "section": "6 Entry Points for Code Exploration",
-    "text": "6 Entry Points for Code Exploration\n\nStart here: R/GeneSelectR.R (main workflow functions)\nData structures: R/classes.R (S4 definitions)\nPython interface: inst/python/GeneSelectR.py (core ML logic)\nExample usage: tests/testthat/test-*.R (unit tests as usage examples)\n\n\nNext: Environment Setup with uv and reticulate"
+    "objectID": "04_python_integration.html#design-decisions",
+    "href": "04_python_integration.html#design-decisions",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "6 Design Decisions",
+    "text": "6 Design Decisions\n\n6.1 Why Not Pure Python?\nKeeping R as the primary interface:\n\nLeverages Bioconductor for GO enrichment (no Python equivalent)\nFamiliar to bioinformaticians already using R\nEasier integration with R Markdown/Quarto for reports\n\n\n\n6.2 Why Not Pure R?\nDelegating ML to Python:\n\nscikit-learn is more mature than R’s caret/tidymodels for this use case\nFaster execution (compiled C/C++ backends)\nBoruta implementation only available in Python\n\n\n\n6.3 Why Not Just Call Scripts?\nreticulate is superior to system(\"python script.py\") because:\n\nNo file I/O overhead (direct memory sharing)\nBetter error handling (Python tracebacks visible in R)\nInteractive debugging (inspect Python objects in R session)"
+  },
+  {
+    "objectID": "04_python_integration.html#troubleshooting",
+    "href": "04_python_integration.html#troubleshooting",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "7 Troubleshooting",
+    "text": "7 Troubleshooting\n\n7.1 “Module not found” despite installation\n\n# Verify Python interpreter\nreticulate::py_config()\n\n# Check sys.path\nreticulate::py_run_string(\"import sys; print(sys.path)\")\n\n# Manually add path\nreticulate::py_run_string(\"sys.path.append('/path/to/packages')\")\n\n\n\n7.2 “Conversion not possible”\n\n# Force conversion to NumPy array\nX_py &lt;- reticulate::np_array(as.matrix(X))\n\n# Force integer type\ny_py &lt;- reticulate::np_array(as.integer(y), dtype = \"int32\")\n\n\n\n7.3 “AttributeError: module has no attribute X”\nLikely a delayed load issue. Force import:\n\nsklearn &lt;- reticulate::import(\"sklearn\", delay_load = FALSE)"
+  },
+  {
+    "objectID": "04_python_integration.html#performance-considerations",
+    "href": "04_python_integration.html#performance-considerations",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "8 Performance Considerations",
+    "text": "8 Performance Considerations\n\n8.1 Memory Copying\nreticulate copies data between R and Python by default. For large datasets:\n\n# Before: 10GB matrix → 20GB total memory (R + Python)\nX_py &lt;- r_to_py(X)\n\n# Consider chunking if memory-constrained\n\n\n\n8.2 Parallelization\nscikit-learn’s n_jobs = -1 uses all CPU cores, but:\n\nOn Windows, requires special setup (enable_multiprocess())\nMay conflict with R’s parallel backends (avoid mixing)"
+  },
+  {
+    "objectID": "04_python_integration.html#summary",
+    "href": "04_python_integration.html#summary",
+    "title": "Python Integration: R ↔︎ Python Interface",
+    "section": "9 Summary",
+    "text": "9 Summary\nGeneSelectR’s Python integration:\n\nImports modules via reticulate at package load\nConverts data types automatically (with type hints for sklearn)\nCalls Python functions as if they were R functions\nReturns results as R-native objects (lists, data.frames)\n\nThis architecture allows Python-based ML pipelines to integrate seamlessly into R-based bioinformatics workflows.\n\nNext: Feature Selection and Hyperparameter Search"
   },
   {
     "objectID": "07_feature_importance.html",
@@ -173,6 +194,97 @@
     "title": "Feature Selection and Hyperparameter Search",
     "section": "7 Summary",
     "text": "7 Summary\nGeneSelectR’s pipeline approach:\n\nStandardizes ML workflows via scikit-learn Pipelines\nCompares multiple feature selection methods systematically\nOptimizes hyperparameters via cross-validation\nOutputs structured results in PipelineResults objects\n\nThe next chapter explores how to visualize and interpret these results.\n\nNext: Metrics and Visualization"
+  },
+  {
+    "objectID": "09_go_enrichment.html",
+    "href": "09_go_enrichment.html",
+    "title": "GO Enrichment Analysis",
+    "section": "",
+    "text": "Feature selection yields gene lists, but the ultimate goal is biological interpretation:\n\nWhat pathways are perturbed?\nWhat cellular processes are affected?\nAre findings consistent with known disease mechanisms?\n\nGene Ontology (GO) enrichment tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes)."
+  },
+  {
+    "objectID": "09_go_enrichment.html#from-genes-to-biology",
+    "href": "09_go_enrichment.html#from-genes-to-biology",
+    "title": "GO Enrichment Analysis",
+    "section": "",
+    "text": "Feature selection yields gene lists, but the ultimate goal is biological interpretation:\n\nWhat pathways are perturbed?\nWhat cellular processes are affected?\nAre findings consistent with known disease mechanisms?\n\nGene Ontology (GO) enrichment tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes)."
+  },
+  {
+    "objectID": "09_go_enrichment.html#go-basics",
+    "href": "09_go_enrichment.html#go-basics",
+    "title": "GO Enrichment Analysis",
+    "section": "2 GO Basics",
+    "text": "2 GO Basics\n\n2.1 Three Ontologies\n\nBiological Process (BP): High-level processes (e.g., “immune response”)\nMolecular Function (MF): Biochemical activities (e.g., “kinase activity”)\nCellular Component (CC): Subcellular locations (e.g., “mitochondrion”)\n\n\n\n2.2 Structure\nGO is a directed acyclic graph (DAG):\n\nTerms are nodes\nRelationships (is-a, part-of) are edges\nChild terms are more specific than parents\n\nExample:\nimmune system process (GO:0002376)\n  ├─ immune response (GO:0006955)\n  │   └─ T cell activation (GO:0042110)\n  └─ lymphocyte activation (GO:0046649)"
+  },
+  {
+    "objectID": "09_go_enrichment.html#enrichment-testing",
+    "href": "09_go_enrichment.html#enrichment-testing",
+    "title": "GO Enrichment Analysis",
+    "section": "3 Enrichment Testing",
+    "text": "3 Enrichment Testing\n\n3.1 Hypergeometric Test\nFor each GO term, test:\n\nk: Number of selected genes in term\nn: Total selected genes\nK: Number of background genes in term\nN: Total background genes\n\nNull hypothesis: Selected genes are randomly drawn from background.\np-value: Probability of observing ≥ k genes in term by chance.\n\n\n3.2 Multiple Testing Correction\nTesting thousands of terms requires correction:\n\nBonferroni: Extremely conservative (p &lt; 0.05 / n_terms)\nBenjamini-Hochberg (FDR): Less conservative, controls false discovery rate\nq-value: Similar to FDR, widely used in genomics\n\nGeneSelectR uses q &lt; 0.05 (FDR-adjusted) by default."
+  },
+  {
+    "objectID": "09_go_enrichment.html#running-enrichment-with-go_enrichment_analysis",
+    "href": "09_go_enrichment.html#running-enrichment-with-go_enrichment_analysis",
+    "title": "GO Enrichment Analysis",
+    "section": "4 Running Enrichment with GO_enrichment_analysis()",
+    "text": "4 Running Enrichment with GO_enrichment_analysis()\n\n4.1 Setup\n\nsuppressPackageStartupMessages({\n  library(clusterProfiler)\n  library(org.Hs.eg.db)\n})\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nannotated &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/AnnotatedGeneLists.rds\"))\nbackground &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/background.rds\"))\n\nExtract gene IDs:\n\n# Example: Lasso-selected genes (ENTREZID required for clusterProfiler)\nlasso_genes &lt;- annotated@inbuilt$Lasso@ENTREZID\ncat(\"Number of genes:\", length(lasso_genes), \"\\n\")\n\n\n\n4.2 Basic Enrichment\n\nlibrary(GeneSelectR)\n\nenrichment_results &lt;- GO_enrichment_analysis(\n  genes = lasso_genes,\n  background = background,  # Background gene IDs\n  ont = \"BP\",  # Biological Process\n  pAdjustMethod = \"BH\",  # Benjamini-Hochberg\n  pvalueCutoff = 0.05,\n  qvalueCutoff = 0.05\n)\n\n# Result is an enrichResult object from clusterProfiler\nhead(enrichment_results@result)\n\nKey columns:\n\nID: GO term ID\nDescription: Term name\nGeneRatio: k/n (genes in term / total selected)\nBgRatio: K/N (background genes in term / total background)\npvalue: Raw p-value\np.adjust: FDR-adjusted p-value\ngeneID: Gene symbols in term (separated by “/”)\n\n\n\n4.3 Enrichment for All Methods\n\nmethods &lt;- names(annotated@inbuilt)\n\nenrichment_list &lt;- lapply(methods, function(method) {\n  genes &lt;- annotated@inbuilt[[method]]@ENTREZID\n  GO_enrichment_analysis(genes, background, ont = \"BP\")\n})\nnames(enrichment_list) &lt;- methods\n\n# Compare top terms per method\nlapply(enrichment_list, function(res) head(res@result$Description, 5))"
+  },
+  {
+    "objectID": "09_go_enrichment.html#visualization",
+    "href": "09_go_enrichment.html#visualization",
+    "title": "GO Enrichment Analysis",
+    "section": "5 Visualization",
+    "text": "5 Visualization\n\n5.1 Dot Plot\n\ndotplot(enrichment_results, showCategory = 20)\n\nShows:\n\nx-axis: Gene ratio (fraction of selected genes in term)\nDot size: Number of genes in term\nDot color: Adjusted p-value\n\n\n\n5.2 Bar Plot\n\nbarplot(enrichment_results, showCategory = 15)\n\nSimpler alternative to dot plot.\n\n\n5.3 Network Plot\n\n# Requires enrichplot package\nlibrary(enrichplot)\ncnetplot(enrichment_results, categorySize = \"pvalue\", foldChange = NULL)\n\nShows gene-term network (which genes belong to which terms)."
+  },
+  {
+    "objectID": "09_go_enrichment.html#go-term-simplification",
+    "href": "09_go_enrichment.html#go-term-simplification",
+    "title": "GO Enrichment Analysis",
+    "section": "6 GO Term Simplification",
+    "text": "6 GO Term Simplification\n\n6.1 The Redundancy Problem\nGO terms are hierarchical and overlapping:\n\n“immune response” and “adaptive immune response” share many genes\nReporting both clutters results\n\nSolution: Simplify to non-redundant representative terms.\n\n\n6.2 Using run_simplify_enrichment()\n\n# Load enrichment result fixture\nenrich_obj &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/EnrichGO.rds\"))\n\nsimplified &lt;- run_simplify_enrichment(\n  enrich_obj,\n  measure = \"Wang\",  # Semantic similarity measure\n  threshold = 0.7    # Terms with similarity &gt; 0.7 clustered together\n)\n\n# Result: clustered terms with representative term per cluster\nhead(simplified)\n\n\n\n6.3 Batch Simplification with run_multiple_simplifyGO()\n\n# Simplify enrichments for all methods\nsimplified_list &lt;- run_multiple_simplifyGO(\n  enrichment_list,\n  cutoff = 0.7,\n  by = \"p.adjust\",\n  measure = \"Wang\"\n)\n\n# Compare simplified terms across methods\nlapply(simplified_list, function(df) df$Description[1:5])"
+  },
+  {
+    "objectID": "09_go_enrichment.html#child-term-metrics",
+    "href": "09_go_enrichment.html#child-term-metrics",
+    "title": "GO Enrichment Analysis",
+    "section": "7 Child Term Metrics",
+    "text": "7 Child Term Metrics\n\n7.1 Concept\nGO parent terms can be overly broad (“metabolic process”). Child term enrichment refines interpretation by testing specific subtypes.\n\n\n7.2 Using compute_GO_child_term_metrics()\n\n# For a broad parent term, compute child enrichments\nchild_results &lt;- compute_GO_child_term_metrics(\n  parent_term = \"GO:0006955\",  # immune response\n  genes = lasso_genes,\n  background = background,\n  org_db = org.Hs.eg.db\n)\n\n# Result: enrichment of child terms under the parent\nhead(child_results)\n\nReveals which specific immune processes are enriched."
+  },
+  {
+    "objectID": "09_go_enrichment.html#design-rationale",
+    "href": "09_go_enrichment.html#design-rationale",
+    "title": "GO Enrichment Analysis",
+    "section": "8 Design Rationale",
+    "text": "8 Design Rationale\n\n8.1 Why ENTREZID?\nclusterProfiler requires Entrez IDs because:\n\nStable across annotation updates\nDirect mapping to GO annotations in Bioconductor org.db packages\n\nGeneSelectR converts symbols → ENTREZID via annotate_gene_lists().\n\n\n8.2 Why Background Matters\nWrong: Test against all genes in the genome\nRight: Test against genes on your assay platform (e.g., microarray probes, RNA-seq detected genes)\nUsing the wrong background inflates p-values (genes not assayed can’t be selected).\n\n\n8.3 Why Simplify Terms?\nRaw enrichment results often contain:\n\n100+ significant terms (overwhelming)\nHighly redundant terms (e.g., “T cell activation” and “regulation of T cell activation”)\n\nSimplification reduces redundancy while preserving biological insights."
+  },
+  {
+    "objectID": "09_go_enrichment.html#troubleshooting",
+    "href": "09_go_enrichment.html#troubleshooting",
+    "title": "GO Enrichment Analysis",
+    "section": "9 Troubleshooting",
+    "text": "9 Troubleshooting\n\n9.1 “No enrichment found”\nPossible causes:\n\nToo few genes: &lt;10 genes may lack power\nWrong background: Background doesn’t overlap selected genes\nStringent cutoffs: Relax qvalueCutoff to 0.10\n\n\n# Check background overlap\nlength(intersect(lasso_genes, background))  # Should be close to length(lasso_genes)\n\n# Relax cutoffs\nGO_enrichment_analysis(lasso_genes, background, qvalueCutoff = 0.10)\n\n\n\n9.2 “Multiple testing correction too harsh”\nFor exploratory analysis:\n\nGO_enrichment_analysis(lasso_genes, background, pAdjustMethod = \"none\")\n# WARNING: Increases false positives; use cautiously"
+  },
+  {
+    "objectID": "09_go_enrichment.html#example-workflow",
+    "href": "09_go_enrichment.html#example-workflow",
+    "title": "GO Enrichment Analysis",
+    "section": "10 Example Workflow",
+    "text": "10 Example Workflow\n\n# 1. Run feature selection\nresults &lt;- perform_grid_search(X, y, ...)\n\n# 2. Annotate gene lists\nannotated &lt;- annotate_gene_lists(results, species = \"Homo.sapiens\")\n\n# 3. Define background (all genes assayed)\nbackground &lt;- colnames(X)  # Or load from fixture\n\n# 4. Enrichment for each method\nmethods &lt;- names(annotated@inbuilt)\nenrichments &lt;- lapply(methods, function(m) {\n  genes &lt;- annotated@inbuilt[[m]]@ENTREZID\n  GO_enrichment_analysis(genes, background, ont = \"BP\")\n})\nnames(enrichments) &lt;- methods\n\n# 5. Simplify redundant terms\nsimplified &lt;- run_multiple_simplifyGO(enrichments, cutoff = 0.7)\n\n# 6. Visualize\ndotplot(enrichments$Lasso, showCategory = 20)\n\n# 7. Export results\nwrite.csv(simplified$Lasso, \"lasso_go_enrichment.csv\")"
+  },
+  {
+    "objectID": "09_go_enrichment.html#interpretation-tips",
+    "href": "09_go_enrichment.html#interpretation-tips",
+    "title": "GO Enrichment Analysis",
+    "section": "11 Interpretation Tips",
+    "text": "11 Interpretation Tips\n\n11.1 Concordance Across Methods\nIf multiple methods enrich similar GO terms:\n\nStrong signal: Biological process is robustly associated with phenotype\nConfidence: Results less likely to be spurious\n\n\n\n11.2 Method-Specific Enrichments\nIf only one method enriches a term:\n\nMay be real: Method captures unique signal (e.g., LASSO finds linear drivers)\nMay be noise: Validate with external data or literature\n\n\n\n11.3 Pathway Coherence\nSelected genes should form coherent pathways:\n\nGood: Genes in “T cell activation” interact in known networks\nSuspicious: Genes have no known interactions (may be false positives)\n\nUse tools like STRING or GeneMANIA to validate."
+  },
+  {
+    "objectID": "09_go_enrichment.html#summary",
+    "href": "09_go_enrichment.html#summary",
+    "title": "GO Enrichment Analysis",
+    "section": "12 Summary",
+    "text": "12 Summary\nGeneSelectR’s GO enrichment pipeline:\n\nAnnotates selected genes (symbol → ENTREZID)\nTests for overrepresentation in GO terms (hypergeometric test)\nSimplifies redundant terms (semantic similarity clustering)\nVisualizes enrichments (dot plots, bar plots, networks)\n\nThe next chapter demonstrates an end-to-end workflow on real data.\n\nNext: End-to-End Demo"
   },
   {
     "objectID": "BUILD_SUCCESS.html",
@@ -560,95 +672,137 @@
     "text": "10 Further Reading\n\nscikit-learn documentation: scikit-learn.org\nclusterProfiler book: yulab-smu.top/biomedical-knowledge-mining-book\nFeature Engineering and Selection: Kuhn & Johnson (2019)\nThe Elements of Statistical Learning: Hastie et al. (2009)\n\n\nEnd of Tour\nThank you for exploring GeneSelectR’s design and implementation. We hope this narrative-first documentation provides clarity on both the what and the why behind the package.\nFor questions, issues, or contributions, visit the GitHub repository.\n\nNavigation: Return to Overview"
   },
   {
-    "objectID": "09_go_enrichment.html",
-    "href": "09_go_enrichment.html",
-    "title": "GO Enrichment Analysis",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Overview: A High-Level Map of GeneSelectR",
     "section": "",
-    "text": "Feature selection yields gene lists, but the ultimate goal is biological interpretation:\n\nWhat pathways are perturbed?\nWhat cellular processes are affected?\nAre findings consistent with known disease mechanisms?\n\nGene Ontology (GO) enrichment tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes)."
+    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
   },
   {
-    "objectID": "09_go_enrichment.html#from-genes-to-biology",
-    "href": "09_go_enrichment.html#from-genes-to-biology",
-    "title": "GO Enrichment Analysis",
+    "objectID": "index.html#what-geneselectr-solves",
+    "href": "index.html#what-geneselectr-solves",
+    "title": "Overview: A High-Level Map of GeneSelectR",
     "section": "",
-    "text": "Feature selection yields gene lists, but the ultimate goal is biological interpretation:\n\nWhat pathways are perturbed?\nWhat cellular processes are affected?\nAre findings consistent with known disease mechanisms?\n\nGene Ontology (GO) enrichment tests whether selected genes are overrepresented in specific biological categories compared to a background (e.g., all assayed genes)."
+    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
   },
   {
-    "objectID": "09_go_enrichment.html#go-basics",
-    "href": "09_go_enrichment.html#go-basics",
-    "title": "GO Enrichment Analysis",
-    "section": "2 GO Basics",
-    "text": "2 GO Basics\n\n2.1 Three Ontologies\n\nBiological Process (BP): High-level processes (e.g., “immune response”)\nMolecular Function (MF): Biochemical activities (e.g., “kinase activity”)\nCellular Component (CC): Subcellular locations (e.g., “mitochondrion”)\n\n\n\n2.2 Structure\nGO is a directed acyclic graph (DAG):\n\nTerms are nodes\nRelationships (is-a, part-of) are edges\nChild terms are more specific than parents\n\nExample:\nimmune system process (GO:0002376)\n  ├─ immune response (GO:0006955)\n  │   └─ T cell activation (GO:0042110)\n  └─ lymphocyte activation (GO:0046649)"
+    "objectID": "index.html#architecture-overview",
+    "href": "index.html#architecture-overview",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "2 Architecture Overview",
+    "text": "2 Architecture Overview\n\n2.1 R Components (R/)\nThe R layer provides:\n\nCore workflow orchestration (GeneSelectR.R):\n\ndefine_sklearn_modules(): Bridge to Python ML modules\nset_default_fs_methods(): Configure feature selection methods\ncreate_pipelines(): Build scikit-learn pipelines via reticulate\nperform_grid_search(): Execute hyperparameter optimization\n\nS4 class system (classes.R):\n\nPipelineResults: Container for CV results, feature importances, metrics\nGeneList: Gene identifiers (SYMBOL, ENSEMBL, ENTREZID)\nAnnotatedGeneLists: Collection of gene lists per method\n\nEvaluation and visualization:\n\ncalculate_mean_cv_scores(), evaluate_test_metrics(): Performance metrics\nplot_metrics(), plot_feature_importance(): Diagnostic plots\ncalculate_overlap_coefficients(), plot_overlap_heatmaps(): Gene set comparison\n\nBioinformatics integration:\n\nGO_enrichment_analysis(): clusterProfiler-based enrichment\nrun_simplify_enrichment(), run_multiple_simplifyGO(): GO term simplification\nannotate_gene_lists(): Convert symbols to IDs\n\n\n\n\n2.2 Python Components (inst/python/)\nPython modules handle computationally intensive tasks:\n\nGeneSelectR.py: Core pipeline execution\n\nGrid search with cross-validation\nFeature importance calculation\nModel training and evaluation\n\nfit_and_evaluate_pipelines.py: Test set evaluation\n\nOut-of-sample performance metrics\nStandardized scoring across methods\n\ngeneset_stability.py: Stability analysis\n\nFeature selection across bootstrap samples\nJaccard index for gene set overlap\n\ncorrelation_filter.py: Preprocessing utilities\n\nRedundancy removal via correlation thresholding"
   },
   {
-    "objectID": "09_go_enrichment.html#enrichment-testing",
-    "href": "09_go_enrichment.html#enrichment-testing",
-    "title": "GO Enrichment Analysis",
-    "section": "3 Enrichment Testing",
-    "text": "3 Enrichment Testing\n\n3.1 Hypergeometric Test\nFor each GO term, test:\n\nk: Number of selected genes in term\nn: Total selected genes\nK: Number of background genes in term\nN: Total background genes\n\nNull hypothesis: Selected genes are randomly drawn from background.\np-value: Probability of observing ≥ k genes in term by chance.\n\n\n3.2 Multiple Testing Correction\nTesting thousands of terms requires correction:\n\nBonferroni: Extremely conservative (p &lt; 0.05 / n_terms)\nBenjamini-Hochberg (FDR): Less conservative, controls false discovery rate\nq-value: Similar to FDR, widely used in genomics\n\nGeneSelectR uses q &lt; 0.05 (FDR-adjusted) by default."
+    "objectID": "index.html#data-flow",
+    "href": "index.html#data-flow",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "3 Data Flow",
+    "text": "3 Data Flow\nInput Data (expression matrix + labels)\n    ↓\n[R] create_pipelines() → build sklearn Pipeline objects\n    ↓\n[Python] perform_grid_search() → hyperparameter optimization\n    ↓\n[R] PipelineResults object ← extract results via reticulate\n    ↓\n[R] get_feature_importances() → extract top genes\n    ↓\n[R] annotate_gene_lists() → map SYMBOL ↔ ENSEMBL ↔ ENTREZID\n    ↓\n[R] GO_enrichment_analysis() → functional interpretation"
   },
   {
-    "objectID": "09_go_enrichment.html#running-enrichment-with-go_enrichment_analysis",
-    "href": "09_go_enrichment.html#running-enrichment-with-go_enrichment_analysis",
-    "title": "GO Enrichment Analysis",
-    "section": "4 Running Enrichment with GO_enrichment_analysis()",
-    "text": "4 Running Enrichment with GO_enrichment_analysis()\n\n4.1 Setup\n\nsuppressPackageStartupMessages({\n  library(clusterProfiler)\n  library(org.Hs.eg.db)\n})\n\nproject_root &lt;- \"/Users/zero/Desktop/GeneSelectR\"\nannotated &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/AnnotatedGeneLists.rds\"))\nbackground &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/background.rds\"))\n\nExtract gene IDs:\n\n# Example: Lasso-selected genes (ENTREZID required for clusterProfiler)\nlasso_genes &lt;- annotated@inbuilt$Lasso@ENTREZID\ncat(\"Number of genes:\", length(lasso_genes), \"\\n\")\n\n\n\n4.2 Basic Enrichment\n\nlibrary(GeneSelectR)\n\nenrichment_results &lt;- GO_enrichment_analysis(\n  genes = lasso_genes,\n  background = background,  # Background gene IDs\n  ont = \"BP\",  # Biological Process\n  pAdjustMethod = \"BH\",  # Benjamini-Hochberg\n  pvalueCutoff = 0.05,\n  qvalueCutoff = 0.05\n)\n\n# Result is an enrichResult object from clusterProfiler\nhead(enrichment_results@result)\n\nKey columns:\n\nID: GO term ID\nDescription: Term name\nGeneRatio: k/n (genes in term / total selected)\nBgRatio: K/N (background genes in term / total background)\npvalue: Raw p-value\np.adjust: FDR-adjusted p-value\ngeneID: Gene symbols in term (separated by “/”)\n\n\n\n4.3 Enrichment for All Methods\n\nmethods &lt;- names(annotated@inbuilt)\n\nenrichment_list &lt;- lapply(methods, function(method) {\n  genes &lt;- annotated@inbuilt[[method]]@ENTREZID\n  GO_enrichment_analysis(genes, background, ont = \"BP\")\n})\nnames(enrichment_list) &lt;- methods\n\n# Compare top terms per method\nlapply(enrichment_list, function(res) head(res@result$Description, 5))"
+    "objectID": "index.html#key-design-decisions",
+    "href": "index.html#key-design-decisions",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "4 Key Design Decisions",
+    "text": "4 Key Design Decisions\n\n4.1 Why R + Python?\n\nR: Rich bioinformatics infrastructure (clusterProfiler, org.db packages), flexible visualization (ggplot2)\nPython: Mature ML ecosystem (scikit-learn), efficient numerical computing\n\nThe reticulate package bridges the two environments with minimal overhead.\n\n\n4.2 Why S4 Classes?\nS4 provides:\n\nFormal slot definitions with type checking\nMethod dispatch for generic functions\nClear contracts for data structures\n\nThe PipelineResults class ensures all pipeline outputs adhere to a consistent schema.\n\n\n4.3 Why Multiple Feature Selection Methods?\nDifferent algorithms capture different aspects of feature relevance:\n\nLASSO: Linear dependencies via L1 regularization\nRandom Forest: Non-linear interactions via tree-based importance\nUnivariate: Marginal associations (fast, interpretable)\nBoruta: All-relevant features via shadow features\n\nEnsemble approaches often yield more robust signatures than single methods."
   },
   {
-    "objectID": "09_go_enrichment.html#visualization",
-    "href": "09_go_enrichment.html#visualization",
-    "title": "GO Enrichment Analysis",
-    "section": "5 Visualization",
-    "text": "5 Visualization\n\n5.1 Dot Plot\n\ndotplot(enrichment_results, showCategory = 20)\n\nShows:\n\nx-axis: Gene ratio (fraction of selected genes in term)\nDot size: Number of genes in term\nDot color: Adjusted p-value\n\n\n\n5.2 Bar Plot\n\nbarplot(enrichment_results, showCategory = 15)\n\nSimpler alternative to dot plot.\n\n\n5.3 Network Plot\n\n# Requires enrichplot package\nlibrary(enrichplot)\ncnetplot(enrichment_results, categorySize = \"pvalue\", foldChange = NULL)\n\nShows gene-term network (which genes belong to which terms)."
+    "objectID": "index.html#reading-guide",
+    "href": "index.html#reading-guide",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "5 Reading Guide",
+    "text": "5 Reading Guide\nSubsequent chapters follow the typical GeneSelectR workflow:\n\nSetup (Ch 2): Environment configuration with uv and reticulate\nCore (Ch 3-5): Class definitions, Python integration, pipeline mechanics\nAnalysis (Ch 6-9): Metrics, importance, overlap, and enrichment\nDemo (Ch 10): End-to-end reproducible example\nSynthesis (Ch 11): Design reflections and extensions\n\nEach chapter is self-contained with executable code chunks using test fixtures to ensure fast rendering."
   },
   {
-    "objectID": "09_go_enrichment.html#go-term-simplification",
-    "href": "09_go_enrichment.html#go-term-simplification",
-    "title": "GO Enrichment Analysis",
-    "section": "6 GO Term Simplification",
-    "text": "6 GO Term Simplification\n\n6.1 The Redundancy Problem\nGO terms are hierarchical and overlapping:\n\n“immune response” and “adaptive immune response” share many genes\nReporting both clutters results\n\nSolution: Simplify to non-redundant representative terms.\n\n\n6.2 Using run_simplify_enrichment()\n\n# Load enrichment result fixture\nenrich_obj &lt;- readRDS(file.path(project_root, \"tests/testthat/fixtures/EnrichGO.rds\"))\n\nsimplified &lt;- run_simplify_enrichment(\n  enrich_obj,\n  measure = \"Wang\",  # Semantic similarity measure\n  threshold = 0.7    # Terms with similarity &gt; 0.7 clustered together\n)\n\n# Result: clustered terms with representative term per cluster\nhead(simplified)\n\n\n\n6.3 Batch Simplification with run_multiple_simplifyGO()\n\n# Simplify enrichments for all methods\nsimplified_list &lt;- run_multiple_simplifyGO(\n  enrichment_list,\n  cutoff = 0.7,\n  by = \"p.adjust\",\n  measure = \"Wang\"\n)\n\n# Compare simplified terms across methods\nlapply(simplified_list, function(df) df$Description[1:5])"
+    "objectID": "index.html#entry-points-for-code-exploration",
+    "href": "index.html#entry-points-for-code-exploration",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "6 Entry Points for Code Exploration",
+    "text": "6 Entry Points for Code Exploration\n\nStart here: R/GeneSelectR.R (main workflow functions)\nData structures: R/classes.R (S4 definitions)\nPython interface: inst/python/GeneSelectR.py (core ML logic)\nExample usage: tests/testthat/test-*.R (unit tests as usage examples)\n\n\nNext: Environment Setup with uv and reticulate"
   },
   {
-    "objectID": "09_go_enrichment.html#child-term-metrics",
-    "href": "09_go_enrichment.html#child-term-metrics",
-    "title": "GO Enrichment Analysis",
-    "section": "7 Child Term Metrics",
-    "text": "7 Child Term Metrics\n\n7.1 Concept\nGO parent terms can be overly broad (“metabolic process”). Child term enrichment refines interpretation by testing specific subtypes.\n\n\n7.2 Using compute_GO_child_term_metrics()\n\n# For a broad parent term, compute child enrichments\nchild_results &lt;- compute_GO_child_term_metrics(\n  parent_term = \"GO:0006955\",  # immune response\n  genes = lasso_genes,\n  background = background,\n  org_db = org.Hs.eg.db\n)\n\n# Result: enrichment of child terms under the parent\nhead(child_results)\n\nReveals which specific immune processes are enriched."
+    "objectID": "DEPLOYMENT.html",
+    "href": "DEPLOYMENT.html",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Live Website: https://jixing475.github.io/GeneSelectR/\nRepository: https://github.com/jixing475/GeneSelectR\nDeployment Date: 2025-11-04\n\n\n\n\n\nContains the R package source code and Quarto documentation source: - R package files (R/, man/, tests/, etc.) - Quarto source files (quarto/*.qmd) - Configuration (quarto/_quarto.yml) - Generated site (quarto/_site/) - tracked for reference\n\n\n\nContains only the compiled website (static HTML): - 13 HTML pages (11 chapters + index + BUILD_SUCCESS) - site_libs/ directory with Bootstrap, Quarto assets - search.json for site search - .nojekyll file (prevents Jekyll processing)\n\n\n\n\nUsed GitHub Pages with gh-pages branch: 1. Website built locally with quarto render 2. Output copied to separate gh-pages branch 3. Branch pushed to GitHub 4. GitHub Pages automatically serves from gh-pages branch\n\n\n\nhttps://jixing475.github.io/GeneSelectR/\n├── index.html (landing page/overview)\n├── 01_overview.html\n├── 02_setup_uv_reticulate.html\n├── 03_core_classes.html\n├── 04_python_integration.html\n├── 05_feature_selection_and_search.html\n├── 06_metrics_and_visualization.html\n├── 07_feature_importance.html\n├── 08_overlap_and_stability.html\n├── 09_go_enrichment.html\n├── 10_end_to_end_demo.html\n├── 11_synthesis.html\n└── site_libs/ (CSS, JS, fonts)\n\n\n\n\n\n\nEdit .qmd files in /Users/zero/Desktop/GeneSelectR/quarto/\nRe-render: cd quarto && quarto render\nDeploy:\ncd /tmp && rm -rf geneselectr-deploy\ngit clone https://github.com/jixing475/GeneSelectR.git geneselectr-deploy\ncd geneselectr-deploy\ngit checkout gh-pages\nrm -rf *\ncp -r /Users/zero/Desktop/GeneSelectR/quarto/_site/. .\nrm -rf _site  # Remove nested _site if exists\ntouch .nojekyll\ngit add -A\ngit commit -m \"docs: Update website\"\ngit push origin gh-pages\n\n\n\n\ncd /Users/zero/Desktop/GeneSelectR/quarto\nquarto render\n# Then follow deploy steps above\n\n\n\n\n\nSource: gh-pages branch, / (root) directory\nCustom domain: None (using default github.io)\nHTTPS: Enforced\nBuild type: Legacy (manual deployment, not GitHub Actions)\n\n\n\n\n\n\n\nCheck deployment status: https://github.com/jixing475/GeneSelectR/deployments\nHard refresh browser (Cmd+Shift+R on Mac, Ctrl+F5 on Windows)\nWait 1-2 minutes for GitHub CDN to refresh\n\n\n\n\nEnsure site_libs/ directory is present in gh-pages branch:\ngit checkout gh-pages\nls site_libs/\n# Should show: bootstrap, clipboard, quarto-html, quarto-nav, quarto-search\n\n\n\nCheck that all .qmd files rendered successfully:\ncd /Users/zero/Desktop/GeneSelectR/quarto\nquarto render 2&gt;&1 | grep -i error\n\n\n\n\nIf automated deployment fails:\ncd /tmp/geneselectr-deploy\ngit push -f origin gh-pages\nNote: Force push (-f) is safe here because gh-pages is deployment-only.\n\n\n\nCheck that your website is live:\ncurl -I https://jixing475.github.io/GeneSelectR/\n# Should return: HTTP/2 200\nOr open in browser:\nopen https://jixing475.github.io/GeneSelectR/\n# macOS\n\n# Or\ngh repo view jixing475/GeneSelectR --web\n\n\n\n\nSource vs Deployment:\n\nmain branch = source code\ngh-pages branch = deployed website\n\nDon’t edit gh-pages directly: Always edit .qmd files, render, then deploy\nCaching: Quarto caches results. To force rebuild:\nquarto render --cache-refresh\nAssets: The site_libs/ directory contains ~700KB of assets. This is normal for Quarto sites.\n\n\n\n\n\nVisit https://jixing475.github.io/GeneSelectR/ to see your site\nShare the URL with collaborators\nConsider adding a custom domain (optional)\nSet up GitHub Actions for automatic deployment on push (optional)\n\n\nDeployment completed: 2025-11-04 21:48 Status: ✅ Live and accessible"
   },
   {
-    "objectID": "09_go_enrichment.html#design-rationale",
-    "href": "09_go_enrichment.html#design-rationale",
-    "title": "GO Enrichment Analysis",
-    "section": "8 Design Rationale",
-    "text": "8 Design Rationale\n\n8.1 Why ENTREZID?\nclusterProfiler requires Entrez IDs because:\n\nStable across annotation updates\nDirect mapping to GO annotations in Bioconductor org.db packages\n\nGeneSelectR converts symbols → ENTREZID via annotate_gene_lists().\n\n\n8.2 Why Background Matters\nWrong: Test against all genes in the genome\nRight: Test against genes on your assay platform (e.g., microarray probes, RNA-seq detected genes)\nUsing the wrong background inflates p-values (genes not assayed can’t be selected).\n\n\n8.3 Why Simplify Terms?\nRaw enrichment results often contain:\n\n100+ significant terms (overwhelming)\nHighly redundant terms (e.g., “T cell activation” and “regulation of T cell activation”)\n\nSimplification reduces redundancy while preserving biological insights."
+    "objectID": "DEPLOYMENT.html#deployment-status-completed",
+    "href": "DEPLOYMENT.html#deployment-status-completed",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Live Website: https://jixing475.github.io/GeneSelectR/\nRepository: https://github.com/jixing475/GeneSelectR\nDeployment Date: 2025-11-04"
   },
   {
-    "objectID": "09_go_enrichment.html#troubleshooting",
-    "href": "09_go_enrichment.html#troubleshooting",
-    "title": "GO Enrichment Analysis",
-    "section": "9 Troubleshooting",
-    "text": "9 Troubleshooting\n\n9.1 “No enrichment found”\nPossible causes:\n\nToo few genes: &lt;10 genes may lack power\nWrong background: Background doesn’t overlap selected genes\nStringent cutoffs: Relax qvalueCutoff to 0.10\n\n\n# Check background overlap\nlength(intersect(lasso_genes, background))  # Should be close to length(lasso_genes)\n\n# Relax cutoffs\nGO_enrichment_analysis(lasso_genes, background, qvalueCutoff = 0.10)\n\n\n\n9.2 “Multiple testing correction too harsh”\nFor exploratory analysis:\n\nGO_enrichment_analysis(lasso_genes, background, pAdjustMethod = \"none\")\n# WARNING: Increases false positives; use cautiously"
+    "objectID": "DEPLOYMENT.html#what-was-deployed",
+    "href": "DEPLOYMENT.html#what-was-deployed",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Contains the R package source code and Quarto documentation source: - R package files (R/, man/, tests/, etc.) - Quarto source files (quarto/*.qmd) - Configuration (quarto/_quarto.yml) - Generated site (quarto/_site/) - tracked for reference\n\n\n\nContains only the compiled website (static HTML): - 13 HTML pages (11 chapters + index + BUILD_SUCCESS) - site_libs/ directory with Bootstrap, Quarto assets - search.json for site search - .nojekyll file (prevents Jekyll processing)"
   },
   {
-    "objectID": "09_go_enrichment.html#example-workflow",
-    "href": "09_go_enrichment.html#example-workflow",
-    "title": "GO Enrichment Analysis",
-    "section": "10 Example Workflow",
-    "text": "10 Example Workflow\n\n# 1. Run feature selection\nresults &lt;- perform_grid_search(X, y, ...)\n\n# 2. Annotate gene lists\nannotated &lt;- annotate_gene_lists(results, species = \"Homo.sapiens\")\n\n# 3. Define background (all genes assayed)\nbackground &lt;- colnames(X)  # Or load from fixture\n\n# 4. Enrichment for each method\nmethods &lt;- names(annotated@inbuilt)\nenrichments &lt;- lapply(methods, function(m) {\n  genes &lt;- annotated@inbuilt[[m]]@ENTREZID\n  GO_enrichment_analysis(genes, background, ont = \"BP\")\n})\nnames(enrichments) &lt;- methods\n\n# 5. Simplify redundant terms\nsimplified &lt;- run_multiple_simplifyGO(enrichments, cutoff = 0.7)\n\n# 6. Visualize\ndotplot(enrichments$Lasso, showCategory = 20)\n\n# 7. Export results\nwrite.csv(simplified$Lasso, \"lasso_go_enrichment.csv\")"
+    "objectID": "DEPLOYMENT.html#deployment-method",
+    "href": "DEPLOYMENT.html#deployment-method",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Used GitHub Pages with gh-pages branch: 1. Website built locally with quarto render 2. Output copied to separate gh-pages branch 3. Branch pushed to GitHub 4. GitHub Pages automatically serves from gh-pages branch"
   },
   {
-    "objectID": "09_go_enrichment.html#interpretation-tips",
-    "href": "09_go_enrichment.html#interpretation-tips",
-    "title": "GO Enrichment Analysis",
-    "section": "11 Interpretation Tips",
-    "text": "11 Interpretation Tips\n\n11.1 Concordance Across Methods\nIf multiple methods enrich similar GO terms:\n\nStrong signal: Biological process is robustly associated with phenotype\nConfidence: Results less likely to be spurious\n\n\n\n11.2 Method-Specific Enrichments\nIf only one method enriches a term:\n\nMay be real: Method captures unique signal (e.g., LASSO finds linear drivers)\nMay be noise: Validate with external data or literature\n\n\n\n11.3 Pathway Coherence\nSelected genes should form coherent pathways:\n\nGood: Genes in “T cell activation” interact in known networks\nSuspicious: Genes have no known interactions (may be false positives)\n\nUse tools like STRING or GeneMANIA to validate."
+    "objectID": "DEPLOYMENT.html#website-structure",
+    "href": "DEPLOYMENT.html#website-structure",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "https://jixing475.github.io/GeneSelectR/\n├── index.html (landing page/overview)\n├── 01_overview.html\n├── 02_setup_uv_reticulate.html\n├── 03_core_classes.html\n├── 04_python_integration.html\n├── 05_feature_selection_and_search.html\n├── 06_metrics_and_visualization.html\n├── 07_feature_importance.html\n├── 08_overlap_and_stability.html\n├── 09_go_enrichment.html\n├── 10_end_to_end_demo.html\n├── 11_synthesis.html\n└── site_libs/ (CSS, JS, fonts)"
   },
   {
-    "objectID": "09_go_enrichment.html#summary",
-    "href": "09_go_enrichment.html#summary",
-    "title": "GO Enrichment Analysis",
-    "section": "12 Summary",
-    "text": "12 Summary\nGeneSelectR’s GO enrichment pipeline:\n\nAnnotates selected genes (symbol → ENTREZID)\nTests for overrepresentation in GO terms (hypergeometric test)\nSimplifies redundant terms (semantic similarity clustering)\nVisualizes enrichments (dot plots, bar plots, networks)\n\nThe next chapter demonstrates an end-to-end workflow on real data.\n\nNext: End-to-End Demo"
+    "objectID": "DEPLOYMENT.html#updating-the-website",
+    "href": "DEPLOYMENT.html#updating-the-website",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Edit .qmd files in /Users/zero/Desktop/GeneSelectR/quarto/\nRe-render: cd quarto && quarto render\nDeploy:\ncd /tmp && rm -rf geneselectr-deploy\ngit clone https://github.com/jixing475/GeneSelectR.git geneselectr-deploy\ncd geneselectr-deploy\ngit checkout gh-pages\nrm -rf *\ncp -r /Users/zero/Desktop/GeneSelectR/quarto/_site/. .\nrm -rf _site  # Remove nested _site if exists\ntouch .nojekyll\ngit add -A\ngit commit -m \"docs: Update website\"\ngit push origin gh-pages\n\n\n\n\ncd /Users/zero/Desktop/GeneSelectR/quarto\nquarto render\n# Then follow deploy steps above"
+  },
+  {
+    "objectID": "DEPLOYMENT.html#github-pages-configuration",
+    "href": "DEPLOYMENT.html#github-pages-configuration",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Source: gh-pages branch, / (root) directory\nCustom domain: None (using default github.io)\nHTTPS: Enforced\nBuild type: Legacy (manual deployment, not GitHub Actions)"
+  },
+  {
+    "objectID": "DEPLOYMENT.html#troubleshooting",
+    "href": "DEPLOYMENT.html#troubleshooting",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Check deployment status: https://github.com/jixing475/GeneSelectR/deployments\nHard refresh browser (Cmd+Shift+R on Mac, Ctrl+F5 on Windows)\nWait 1-2 minutes for GitHub CDN to refresh\n\n\n\n\nEnsure site_libs/ directory is present in gh-pages branch:\ngit checkout gh-pages\nls site_libs/\n# Should show: bootstrap, clipboard, quarto-html, quarto-nav, quarto-search\n\n\n\nCheck that all .qmd files rendered successfully:\ncd /Users/zero/Desktop/GeneSelectR/quarto\nquarto render 2&gt;&1 | grep -i error"
+  },
+  {
+    "objectID": "DEPLOYMENT.html#manual-push-if-needed",
+    "href": "DEPLOYMENT.html#manual-push-if-needed",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "If automated deployment fails:\ncd /tmp/geneselectr-deploy\ngit push -f origin gh-pages\nNote: Force push (-f) is safe here because gh-pages is deployment-only."
+  },
+  {
+    "objectID": "DEPLOYMENT.html#verification",
+    "href": "DEPLOYMENT.html#verification",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Check that your website is live:\ncurl -I https://jixing475.github.io/GeneSelectR/\n# Should return: HTTP/2 200\nOr open in browser:\nopen https://jixing475.github.io/GeneSelectR/\n# macOS\n\n# Or\ngh repo view jixing475/GeneSelectR --web"
+  },
+  {
+    "objectID": "DEPLOYMENT.html#important-notes",
+    "href": "DEPLOYMENT.html#important-notes",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Source vs Deployment:\n\nmain branch = source code\ngh-pages branch = deployed website\n\nDon’t edit gh-pages directly: Always edit .qmd files, render, then deploy\nCaching: Quarto caches results. To force rebuild:\nquarto render --cache-refresh\nAssets: The site_libs/ directory contains ~700KB of assets. This is normal for Quarto sites."
+  },
+  {
+    "objectID": "DEPLOYMENT.html#next-steps",
+    "href": "DEPLOYMENT.html#next-steps",
+    "title": "1 GeneSelectR Quarto Website - Deployment Guide",
+    "section": "",
+    "text": "Visit https://jixing475.github.io/GeneSelectR/ to see your site\nShare the URL with collaborators\nConsider adding a custom domain (optional)\nSet up GitHub Actions for automatic deployment on push (optional)\n\n\nDeployment completed: 2025-11-04 21:48 Status: ✅ Live and accessible"
   },
   {
     "objectID": "10_end_to_end_demo.html",
@@ -749,73 +903,52 @@
     "text": "13 Summary\nThis end-to-end workflow demonstrates:\n\nEnvironment setup with uv and reticulate\nPipeline creation with multiple feature selection methods\nHyperparameter optimization via grid search\nPerformance evaluation on CV and test sets\nFeature importance extraction and visualization\nGene set overlap analysis\nGO enrichment for biological interpretation\n\nAll steps are reproducible via Quarto caching and fixed random seeds.\n\nNext: Synthesis: Design and Extensions"
   },
   {
-    "objectID": "04_python_integration.html",
-    "href": "04_python_integration.html",
-    "title": "Python Integration: R ↔︎ Python Interface",
+    "objectID": "01_overview.html.html",
+    "href": "01_overview.html.html",
+    "title": "Overview: A High-Level Map of GeneSelectR",
     "section": "",
-    "text": "GeneSelectR uses reticulate to call Python code from R. Unlike system calls or JSON-based APIs, reticulate:\n\nImports Python modules as R objects\nConverts data structures bidirectionally (data.frame ↔︎ pandas DataFrame, list ↔︎ dict)\nPreserves object references across language boundaries\nHandles errors by translating Python exceptions to R errors\n\nThis enables seamless workflows like:\n\n# Import Python module\nsklearn &lt;- reticulate::import(\"sklearn\")\n\n# Call Python function with R data\nmodel &lt;- sklearn$ensemble$RandomForestClassifier(n_estimators = 100L)\n\n# Python object methods accessible via $\nmodel$fit(X_train, y_train)\npredictions &lt;- model$predict(X_test)"
+    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
   },
   {
-    "objectID": "04_python_integration.html#the-reticulate-bridge",
-    "href": "04_python_integration.html#the-reticulate-bridge",
-    "title": "Python Integration: R ↔︎ Python Interface",
+    "objectID": "01_overview.html.html#what-geneselectr-solves",
+    "href": "01_overview.html.html#what-geneselectr-solves",
+    "title": "Overview: A High-Level Map of GeneSelectR",
     "section": "",
-    "text": "GeneSelectR uses reticulate to call Python code from R. Unlike system calls or JSON-based APIs, reticulate:\n\nImports Python modules as R objects\nConverts data structures bidirectionally (data.frame ↔︎ pandas DataFrame, list ↔︎ dict)\nPreserves object references across language boundaries\nHandles errors by translating Python exceptions to R errors\n\nThis enables seamless workflows like:\n\n# Import Python module\nsklearn &lt;- reticulate::import(\"sklearn\")\n\n# Call Python function with R data\nmodel &lt;- sklearn$ensemble$RandomForestClassifier(n_estimators = 100L)\n\n# Python object methods accessible via $\nmodel$fit(X_train, y_train)\npredictions &lt;- model$predict(X_test)"
+    "text": "GeneSelectR addresses a fundamental challenge in bioinformatics: identifying robust, biologically meaningful gene signatures from high-dimensional genomic data. The package combines:\n\nMultiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)\nHyperparameter optimization via grid search\nCross-validation and test set evaluation\nFeature importance estimation (both model-based and permutation-based)\nGene set overlap and stability analysis\nGO enrichment analysis for functional interpretation\n\nThe core innovation is a hybrid R-Python architecture that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines."
   },
   {
-    "objectID": "04_python_integration.html#geneselectrs-python-modules",
-    "href": "04_python_integration.html#geneselectrs-python-modules",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "2 GeneSelectR’s Python Modules",
-    "text": "2 GeneSelectR’s Python Modules\nThe package defines four Python modules in inst/python/:\n\nGeneSelectR.py: Core pipeline execution\nfit_and_evaluate_pipelines.py: Test set evaluation\ngeneset_stability.py: Bootstrap stability analysis\ncorrelation_filter.py: Feature preprocessing\n\nThese are imported and called by R wrapper functions."
+    "objectID": "01_overview.html.html#architecture-overview",
+    "href": "01_overview.html.html#architecture-overview",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "2 Architecture Overview",
+    "text": "2 Architecture Overview\n\n2.1 R Components (R/)\nThe R layer provides:\n\nCore workflow orchestration (GeneSelectR.R):\n\ndefine_sklearn_modules(): Bridge to Python ML modules\nset_default_fs_methods(): Configure feature selection methods\ncreate_pipelines(): Build scikit-learn pipelines via reticulate\nperform_grid_search(): Execute hyperparameter optimization\n\nS4 class system (classes.R):\n\nPipelineResults: Container for CV results, feature importances, metrics\nGeneList: Gene identifiers (SYMBOL, ENSEMBL, ENTREZID)\nAnnotatedGeneLists: Collection of gene lists per method\n\nEvaluation and visualization:\n\ncalculate_mean_cv_scores(), evaluate_test_metrics(): Performance metrics\nplot_metrics(), plot_feature_importance(): Diagnostic plots\ncalculate_overlap_coefficients(), plot_overlap_heatmaps(): Gene set comparison\n\nBioinformatics integration:\n\nGO_enrichment_analysis(): clusterProfiler-based enrichment\nrun_simplify_enrichment(), run_multiple_simplifyGO(): GO term simplification\nannotate_gene_lists(): Convert symbols to IDs\n\n\n\n\n2.2 Python Components (inst/python/)\nPython modules handle computationally intensive tasks:\n\nGeneSelectR.py: Core pipeline execution\n\nGrid search with cross-validation\nFeature importance calculation\nModel training and evaluation\n\nfit_and_evaluate_pipelines.py: Test set evaluation\n\nOut-of-sample performance metrics\nStandardized scoring across methods\n\ngeneset_stability.py: Stability analysis\n\nFeature selection across bootstrap samples\nJaccard index for gene set overlap\n\ncorrelation_filter.py: Preprocessing utilities\n\nRedundancy removal via correlation thresholding"
   },
   {
-    "objectID": "04_python_integration.html#module-import-workflow",
-    "href": "04_python_integration.html#module-import-workflow",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "3 Module Import Workflow",
-    "text": "3 Module Import Workflow\n\n3.1 Step 1: Import at Package Load\nR/import_python_packages.R defines the import logic:\n\nimport_python_packages &lt;- function() {\n  \n  sklearn &lt;&lt;- reticulate::import(\"sklearn\", delay_load = TRUE)\n  np &lt;&lt;- reticulate::import(\"numpy\", delay_load = TRUE)\n  skopt &lt;&lt;- reticulate::import(\"skopt\", delay_load = TRUE)\n  boruta &lt;&lt;- reticulate::import(\"boruta\", delay_load = TRUE)\n  sys &lt;&lt;- reticulate::import(\"sys\", delay_load = TRUE)\n  multiprocessing &lt;&lt;- reticulate::import(\"multiprocessing\", delay_load = TRUE)\n  \n  # Import custom modules from inst/python\n  GeneSelectR_py &lt;&lt;- reticulate::import_from_path(\n    \"GeneSelectR\", \n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  fit_and_evaluate &lt;&lt;- reticulate::import_from_path(\n    \"fit_and_evaluate_pipelines\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  geneset_stability_py &lt;&lt;- reticulate::import_from_path(\n    \"geneset_stability\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n  \n  correlation_filter &lt;&lt;- reticulate::import_from_path(\n    \"correlation_filter\",\n    path = system.file(\"python\", package = \"GeneSelectR\")\n  )\n}\n\nKey details:\n\ndelay_load = TRUE: Postpones import until first use (faster package load)\nimport_from_path(): Loads local .py files (not installed packages)\n&lt;&lt;-: Assigns to package namespace (global within package)\n\n\n\n3.2 Step 2: Module Availability Check\nBefore calling Python functions, verify modules exist:\n\nif (!reticulate::py_module_available(\"sklearn\")) {\n  stop(\"scikit-learn not found. Install with: uv pip install scikit-learn\")\n}\n\nGeneSelectR includes skip_if_no_modules() for conditional test execution."
+    "objectID": "01_overview.html.html#data-flow",
+    "href": "01_overview.html.html#data-flow",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "3 Data Flow",
+    "text": "3 Data Flow\nInput Data (expression matrix + labels)\n    ↓\n[R] create_pipelines() → build sklearn Pipeline objects\n    ↓\n[Python] perform_grid_search() → hyperparameter optimization\n    ↓\n[R] PipelineResults object ← extract results via reticulate\n    ↓\n[R] get_feature_importances() → extract top genes\n    ↓\n[R] annotate_gene_lists() → map SYMBOL ↔ ENSEMBL ↔ ENTREZID\n    ↓\n[R] GO_enrichment_analysis() → functional interpretation"
   },
   {
-    "objectID": "04_python_integration.html#data-type-conversion",
-    "href": "04_python_integration.html#data-type-conversion",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "4 Data Type Conversion",
-    "text": "4 Data Type Conversion\n\n4.1 R → Python\n\n\n\n\n\n\n\n\nR Type\nPython Type\nNotes\n\n\n\n\nnumeric\nnumpy.ndarray\nAlways converted to arrays\n\n\ninteger\nint or np.int64\nUse 100L for explicit int\n\n\ncharacter\nstr\nDirect mapping\n\n\nlist\nlist\nRecursive conversion\n\n\ndata.frame\npandas.DataFrame\nColumn names preserved\n\n\nmatrix\nnumpy.ndarray\nRow-major to column-major flip\n\n\n\nCritical: scikit-learn expects integer labels, not strings. GeneSelectR converts:\n\n# R factor → Python int array\ny_labels &lt;- as.integer(factor(y)) - 1L  # 0-indexed\n\n\n\n4.2 Python → R\n\n\n\nPython Type\nR Type\nNotes\n\n\n\n\nnp.ndarray\nmatrix/array\nDepends on dimensions\n\n\npd.DataFrame\ndata.frame\nIndex becomes row names\n\n\ndict\nlist\nNamed list\n\n\nlist\nlist\nDirect mapping\n\n\nNone\nNULL\nDirect mapping\n\n\n\nGotcha: Python 0-indexed arrays become 1-indexed R vectors. GeneSelectR handles this in feature importance extraction."
+    "objectID": "01_overview.html.html#key-design-decisions",
+    "href": "01_overview.html.html#key-design-decisions",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "4 Key Design Decisions",
+    "text": "4 Key Design Decisions\n\n4.1 Why R + Python?\n\nR: Rich bioinformatics infrastructure (clusterProfiler, org.db packages), flexible visualization (ggplot2)\nPython: Mature ML ecosystem (scikit-learn), efficient numerical computing\n\nThe reticulate package bridges the two environments with minimal overhead.\n\n\n4.2 Why S4 Classes?\nS4 provides:\n\nFormal slot definitions with type checking\nMethod dispatch for generic functions\nClear contracts for data structures\n\nThe PipelineResults class ensures all pipeline outputs adhere to a consistent schema.\n\n\n4.3 Why Multiple Feature Selection Methods?\nDifferent algorithms capture different aspects of feature relevance:\n\nLASSO: Linear dependencies via L1 regularization\nRandom Forest: Non-linear interactions via tree-based importance\nUnivariate: Marginal associations (fast, interpretable)\nBoruta: All-relevant features via shadow features\n\nEnsemble approaches often yield more robust signatures than single methods."
   },
   {
-    "objectID": "04_python_integration.html#calling-python-functions-from-r",
-    "href": "04_python_integration.html#calling-python-functions-from-r",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "5 Calling Python Functions from R",
-    "text": "5 Calling Python Functions from R\n\n5.1 Example 1: define_sklearn_modules()\nThis R function wraps Python imports:\n\ndefine_sklearn_modules &lt;- function() {\n  preprocessing &lt;- sklearn$preprocessing\n  model_selection &lt;- sklearn$model_selection\n  feature_selection &lt;- sklearn$feature_selection\n  ensemble &lt;- sklearn$ensemble\n  \n  forest &lt;- sklearn$ensemble$RandomForestClassifier\n  lasso &lt;- sklearn$linear_model$LogisticRegression\n  \n  return(list(\n    preprocessing = preprocessing,\n    forest = forest,\n    lasso = lasso,\n    ...\n  ))\n}\n\nReturns a list of Python class references (not instances).\n\n\n5.2 Example 2: create_pipelines()\nBuilds scikit-learn Pipeline objects:\n\ncreate_pipelines &lt;- function(preprocessing_steps, fs_methods, classifier, modules) {\n  pipelines &lt;- list()\n  \n  for (method_name in names(fs_methods)) {\n    steps &lt;- c(\n      preprocessing_steps,\n      list(feature_selector = fs_methods[[method_name]]),\n      list(classifier = classifier)\n    )\n    \n    # Call Python Pipeline constructor\n    pipeline &lt;- modules$pipeline$Pipeline(steps = steps)\n    pipelines[[method_name]] &lt;- pipeline\n  }\n  \n  return(pipelines)\n}\n\nThe resulting list contains Python Pipeline objects, ready for .fit().\n\n\n5.3 Example 3: perform_grid_search()\nCalls custom Python function:\n\nperform_grid_search &lt;- function(pipelines, param_grids, X, y, ...) {\n  # Convert R data to Python-compatible format\n  X_py &lt;- r_to_py(X)\n  y_py &lt;- r_to_py(as.integer(y) - 1L)\n  \n  # Call inst/python/GeneSelectR.py function\n  results &lt;- GeneSelectR_py$perform_grid_search_with_feature_importance(\n    pipelines = pipelines,\n    param_grids = param_grids,\n    X = X_py,\n    y = y_py,\n    cv = 5L,\n    n_jobs = -1L\n  )\n  \n  # Results is a Python dict; accessible as R list\n  return(results)\n}"
+    "objectID": "01_overview.html.html#reading-guide",
+    "href": "01_overview.html.html#reading-guide",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "5 Reading Guide",
+    "text": "5 Reading Guide\nSubsequent chapters follow the typical GeneSelectR workflow:\n\nSetup (Ch 2): Environment configuration with uv and reticulate\nCore (Ch 3-5): Class definitions, Python integration, pipeline mechanics\nAnalysis (Ch 6-9): Metrics, importance, overlap, and enrichment\nDemo (Ch 10): End-to-end reproducible example\nSynthesis (Ch 11): Design reflections and extensions\n\nEach chapter is self-contained with executable code chunks using test fixtures to ensure fast rendering."
   },
   {
-    "objectID": "04_python_integration.html#design-decisions",
-    "href": "04_python_integration.html#design-decisions",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "6 Design Decisions",
-    "text": "6 Design Decisions\n\n6.1 Why Not Pure Python?\nKeeping R as the primary interface:\n\nLeverages Bioconductor for GO enrichment (no Python equivalent)\nFamiliar to bioinformaticians already using R\nEasier integration with R Markdown/Quarto for reports\n\n\n\n6.2 Why Not Pure R?\nDelegating ML to Python:\n\nscikit-learn is more mature than R’s caret/tidymodels for this use case\nFaster execution (compiled C/C++ backends)\nBoruta implementation only available in Python\n\n\n\n6.3 Why Not Just Call Scripts?\nreticulate is superior to system(\"python script.py\") because:\n\nNo file I/O overhead (direct memory sharing)\nBetter error handling (Python tracebacks visible in R)\nInteractive debugging (inspect Python objects in R session)"
-  },
-  {
-    "objectID": "04_python_integration.html#troubleshooting",
-    "href": "04_python_integration.html#troubleshooting",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "7 Troubleshooting",
-    "text": "7 Troubleshooting\n\n7.1 “Module not found” despite installation\n\n# Verify Python interpreter\nreticulate::py_config()\n\n# Check sys.path\nreticulate::py_run_string(\"import sys; print(sys.path)\")\n\n# Manually add path\nreticulate::py_run_string(\"sys.path.append('/path/to/packages')\")\n\n\n\n7.2 “Conversion not possible”\n\n# Force conversion to NumPy array\nX_py &lt;- reticulate::np_array(as.matrix(X))\n\n# Force integer type\ny_py &lt;- reticulate::np_array(as.integer(y), dtype = \"int32\")\n\n\n\n7.3 “AttributeError: module has no attribute X”\nLikely a delayed load issue. Force import:\n\nsklearn &lt;- reticulate::import(\"sklearn\", delay_load = FALSE)"
-  },
-  {
-    "objectID": "04_python_integration.html#performance-considerations",
-    "href": "04_python_integration.html#performance-considerations",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "8 Performance Considerations",
-    "text": "8 Performance Considerations\n\n8.1 Memory Copying\nreticulate copies data between R and Python by default. For large datasets:\n\n# Before: 10GB matrix → 20GB total memory (R + Python)\nX_py &lt;- r_to_py(X)\n\n# Consider chunking if memory-constrained\n\n\n\n8.2 Parallelization\nscikit-learn’s n_jobs = -1 uses all CPU cores, but:\n\nOn Windows, requires special setup (enable_multiprocess())\nMay conflict with R’s parallel backends (avoid mixing)"
-  },
-  {
-    "objectID": "04_python_integration.html#summary",
-    "href": "04_python_integration.html#summary",
-    "title": "Python Integration: R ↔︎ Python Interface",
-    "section": "9 Summary",
-    "text": "9 Summary\nGeneSelectR’s Python integration:\n\nImports modules via reticulate at package load\nConverts data types automatically (with type hints for sklearn)\nCalls Python functions as if they were R functions\nReturns results as R-native objects (lists, data.frames)\n\nThis architecture allows Python-based ML pipelines to integrate seamlessly into R-based bioinformatics workflows.\n\nNext: Feature Selection and Hyperparameter Search"
+    "objectID": "01_overview.html.html#entry-points-for-code-exploration",
+    "href": "01_overview.html.html#entry-points-for-code-exploration",
+    "title": "Overview: A High-Level Map of GeneSelectR",
+    "section": "6 Entry Points for Code Exploration",
+    "text": "6 Entry Points for Code Exploration\n\nStart here: R/GeneSelectR.R (main workflow functions)\nData structures: R/classes.R (S4 definitions)\nPython interface: inst/python/GeneSelectR.py (core ML logic)\nExample usage: tests/testthat/test-*.R (unit tests as usage examples)\n\n\nNext: Environment Setup with uv and reticulate"
   }
 ]

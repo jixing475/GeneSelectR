@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Overview: A High-Level Map of GeneSelectR – GeneSelectR: A Literate Tour</title>
+<title>deployment – GeneSelectR: A Literate Tour</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -88,8 +122,8 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./01_overview.html" aria-current="page"> 
-<span class="menu-text">Overview</span></a>
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./02_setup_uv_reticulate.html"> 
@@ -161,191 +195,189 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#what-geneselectr-solves" id="toc-what-geneselectr-solves" class="nav-link active" data-scroll-target="#what-geneselectr-solves"><span class="header-section-number">1</span> What GeneSelectR Solves</a></li>
-  <li><a href="#architecture-overview" id="toc-architecture-overview" class="nav-link" data-scroll-target="#architecture-overview"><span class="header-section-number">2</span> Architecture Overview</a>
+  <li><a href="#geneselectr-quarto-website---deployment-guide" id="toc-geneselectr-quarto-website---deployment-guide" class="nav-link active" data-scroll-target="#geneselectr-quarto-website---deployment-guide"><span class="header-section-number">1</span> GeneSelectR Quarto Website - Deployment Guide</a>
   <ul class="collapse">
-  <li><a href="#r-components-r" id="toc-r-components-r" class="nav-link" data-scroll-target="#r-components-r"><span class="header-section-number">2.1</span> R Components (<code>R/</code>)</a></li>
-  <li><a href="#python-components-instpython" id="toc-python-components-instpython" class="nav-link" data-scroll-target="#python-components-instpython"><span class="header-section-number">2.2</span> Python Components (<code>inst/python/</code>)</a></li>
-  </ul></li>
-  <li><a href="#data-flow" id="toc-data-flow" class="nav-link" data-scroll-target="#data-flow"><span class="header-section-number">3</span> Data Flow</a></li>
-  <li><a href="#key-design-decisions" id="toc-key-design-decisions" class="nav-link" data-scroll-target="#key-design-decisions"><span class="header-section-number">4</span> Key Design Decisions</a>
+  <li><a href="#deployment-status-completed" id="toc-deployment-status-completed" class="nav-link" data-scroll-target="#deployment-status-completed"><span class="header-section-number">1.1</span> ✅ Deployment Status: COMPLETED</a></li>
+  <li><a href="#what-was-deployed" id="toc-what-was-deployed" class="nav-link" data-scroll-target="#what-was-deployed"><span class="header-section-number">1.2</span> What Was Deployed</a>
   <ul class="collapse">
-  <li><a href="#why-r-python" id="toc-why-r-python" class="nav-link" data-scroll-target="#why-r-python"><span class="header-section-number">4.1</span> Why R + Python?</a></li>
-  <li><a href="#why-s4-classes" id="toc-why-s4-classes" class="nav-link" data-scroll-target="#why-s4-classes"><span class="header-section-number">4.2</span> Why S4 Classes?</a></li>
-  <li><a href="#why-multiple-feature-selection-methods" id="toc-why-multiple-feature-selection-methods" class="nav-link" data-scroll-target="#why-multiple-feature-selection-methods"><span class="header-section-number">4.3</span> Why Multiple Feature Selection Methods?</a></li>
+  <li><a href="#main-branch-main" id="toc-main-branch-main" class="nav-link" data-scroll-target="#main-branch-main"><span class="header-section-number">1.2.1</span> Main Branch (<code>main</code>)</a></li>
+  <li><a href="#github-pages-branch-gh-pages" id="toc-github-pages-branch-gh-pages" class="nav-link" data-scroll-target="#github-pages-branch-gh-pages"><span class="header-section-number">1.2.2</span> GitHub Pages Branch (<code>gh-pages</code>)</a></li>
   </ul></li>
-  <li><a href="#reading-guide" id="toc-reading-guide" class="nav-link" data-scroll-target="#reading-guide"><span class="header-section-number">5</span> Reading Guide</a></li>
-  <li><a href="#entry-points-for-code-exploration" id="toc-entry-points-for-code-exploration" class="nav-link" data-scroll-target="#entry-points-for-code-exploration"><span class="header-section-number">6</span> Entry Points for Code Exploration</a></li>
+  <li><a href="#deployment-method" id="toc-deployment-method" class="nav-link" data-scroll-target="#deployment-method"><span class="header-section-number">1.3</span> Deployment Method</a></li>
+  <li><a href="#website-structure" id="toc-website-structure" class="nav-link" data-scroll-target="#website-structure"><span class="header-section-number">1.4</span> Website Structure</a></li>
+  <li><a href="#updating-the-website" id="toc-updating-the-website" class="nav-link" data-scroll-target="#updating-the-website"><span class="header-section-number">1.5</span> Updating the Website</a>
+  <ul class="collapse">
+  <li><a href="#quick-update-minor-changes" id="toc-quick-update-minor-changes" class="nav-link" data-scroll-target="#quick-update-minor-changes"><span class="header-section-number">1.5.1</span> Quick Update (Minor Changes)</a></li>
+  <li><a href="#full-rebuild" id="toc-full-rebuild" class="nav-link" data-scroll-target="#full-rebuild"><span class="header-section-number">1.5.2</span> Full Rebuild</a></li>
+  </ul></li>
+  <li><a href="#github-pages-configuration" id="toc-github-pages-configuration" class="nav-link" data-scroll-target="#github-pages-configuration"><span class="header-section-number">1.6</span> GitHub Pages Configuration</a></li>
+  <li><a href="#troubleshooting" id="toc-troubleshooting" class="nav-link" data-scroll-target="#troubleshooting"><span class="header-section-number">1.7</span> Troubleshooting</a>
+  <ul class="collapse">
+  <li><a href="#website-not-updating" id="toc-website-not-updating" class="nav-link" data-scroll-target="#website-not-updating"><span class="header-section-number">1.7.1</span> Website not updating</a></li>
+  <li><a href="#styles-not-loading" id="toc-styles-not-loading" class="nav-link" data-scroll-target="#styles-not-loading"><span class="header-section-number">1.7.2</span> Styles not loading</a></li>
+  <li><a href="#broken-links" id="toc-broken-links" class="nav-link" data-scroll-target="#broken-links"><span class="header-section-number">1.7.3</span> Broken links</a></li>
+  </ul></li>
+  <li><a href="#manual-push-if-needed" id="toc-manual-push-if-needed" class="nav-link" data-scroll-target="#manual-push-if-needed"><span class="header-section-number">1.8</span> Manual Push (If Needed)</a></li>
+  <li><a href="#verification" id="toc-verification" class="nav-link" data-scroll-target="#verification"><span class="header-section-number">1.9</span> Verification</a></li>
+  <li><a href="#important-notes" id="toc-important-notes" class="nav-link" data-scroll-target="#important-notes"><span class="header-section-number">1.10</span> Important Notes</a></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps"><span class="header-section-number">1.11</span> Next Steps</a></li>
+  </ul></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/jixing475/GeneSelectR/edit/main/DEPLOYMENT.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jixing475/GeneSelectR/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Overview: A High-Level Map of GeneSelectR</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
 
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<section id="what-geneselectr-solves" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="what-geneselectr-solves"><span class="header-section-number">1</span> What GeneSelectR Solves</h2>
-<p>GeneSelectR addresses a fundamental challenge in bioinformatics: <strong>identifying robust, biologically meaningful gene signatures from high-dimensional genomic data</strong>. The package combines:</p>
-<ul>
-<li>Multiple feature selection algorithms (LASSO, Random Forest, Univariate, Boruta)</li>
-<li>Hyperparameter optimization via grid search</li>
-<li>Cross-validation and test set evaluation</li>
-<li>Feature importance estimation (both model-based and permutation-based)</li>
-<li>Gene set overlap and stability analysis</li>
-<li>GO enrichment analysis for functional interpretation</li>
-</ul>
-<p>The core innovation is a <strong>hybrid R-Python architecture</strong> that leverages R’s bioinformatics ecosystem (Bioconductor) while harnessing Python’s scikit-learn for efficient machine learning pipelines.</p>
+<section id="geneselectr-quarto-website---deployment-guide" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> GeneSelectR Quarto Website - Deployment Guide</h1>
+<section id="deployment-status-completed" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="deployment-status-completed"><span class="header-section-number">1.1</span> ✅ Deployment Status: COMPLETED</h2>
+<p><strong>Live Website</strong>: https://jixing475.github.io/GeneSelectR/</p>
+<p><strong>Repository</strong>: https://github.com/jixing475/GeneSelectR</p>
+<p><strong>Deployment Date</strong>: 2025-11-04</p>
 </section>
-<section id="architecture-overview" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="architecture-overview"><span class="header-section-number">2</span> Architecture Overview</h2>
-<section id="r-components-r" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="r-components-r"><span class="header-section-number">2.1</span> R Components (<code>R/</code>)</h3>
-<p>The R layer provides:</p>
+<section id="what-was-deployed" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="what-was-deployed"><span class="header-section-number">1.2</span> What Was Deployed</h2>
+<section id="main-branch-main" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="main-branch-main"><span class="header-section-number">1.2.1</span> Main Branch (<code>main</code>)</h3>
+<p>Contains the R package source code and Quarto documentation source: - R package files (<code>R/</code>, <code>man/</code>, <code>tests/</code>, etc.) - Quarto source files (<code>quarto/*.qmd</code>) - Configuration (<code>quarto/_quarto.yml</code>) - Generated site (<code>quarto/_site/</code>) - tracked for reference</p>
+</section>
+<section id="github-pages-branch-gh-pages" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="github-pages-branch-gh-pages"><span class="header-section-number">1.2.2</span> GitHub Pages Branch (<code>gh-pages</code>)</h3>
+<p>Contains only the compiled website (static HTML): - 13 HTML pages (11 chapters + index + BUILD_SUCCESS) - site_libs/ directory with Bootstrap, Quarto assets - search.json for site search - .nojekyll file (prevents Jekyll processing)</p>
+</section>
+</section>
+<section id="deployment-method" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="deployment-method"><span class="header-section-number">1.3</span> Deployment Method</h2>
+<p>Used <strong>GitHub Pages</strong> with <code>gh-pages</code> branch: 1. Website built locally with <code>quarto render</code> 2. Output copied to separate <code>gh-pages</code> branch 3. Branch pushed to GitHub 4. GitHub Pages automatically serves from <code>gh-pages</code> branch</p>
+</section>
+<section id="website-structure" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="website-structure"><span class="header-section-number">1.4</span> Website Structure</h2>
+<pre><code>https://jixing475.github.io/GeneSelectR/
+├── index.html (landing page/overview)
+├── 01_overview.html
+├── 02_setup_uv_reticulate.html
+├── 03_core_classes.html
+├── 04_python_integration.html
+├── 05_feature_selection_and_search.html
+├── 06_metrics_and_visualization.html
+├── 07_feature_importance.html
+├── 08_overlap_and_stability.html
+├── 09_go_enrichment.html
+├── 10_end_to_end_demo.html
+├── 11_synthesis.html
+└── site_libs/ (CSS, JS, fonts)</code></pre>
+</section>
+<section id="updating-the-website" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="updating-the-website"><span class="header-section-number">1.5</span> Updating the Website</h2>
+<section id="quick-update-minor-changes" class="level3" data-number="1.5.1">
+<h3 data-number="1.5.1" class="anchored" data-anchor-id="quick-update-minor-changes"><span class="header-section-number">1.5.1</span> Quick Update (Minor Changes)</h3>
 <ol type="1">
-<li><strong>Core workflow orchestration</strong> (<code>GeneSelectR.R</code>):
-<ul>
-<li><code>define_sklearn_modules()</code>: Bridge to Python ML modules</li>
-<li><code>set_default_fs_methods()</code>: Configure feature selection methods</li>
-<li><code>create_pipelines()</code>: Build scikit-learn pipelines via reticulate</li>
-<li><code>perform_grid_search()</code>: Execute hyperparameter optimization</li>
-</ul></li>
-<li><strong>S4 class system</strong> (<code>classes.R</code>):
-<ul>
-<li><code>PipelineResults</code>: Container for CV results, feature importances, metrics</li>
-<li><code>GeneList</code>: Gene identifiers (SYMBOL, ENSEMBL, ENTREZID)</li>
-<li><code>AnnotatedGeneLists</code>: Collection of gene lists per method</li>
-</ul></li>
-<li><strong>Evaluation and visualization</strong>:
-<ul>
-<li><code>calculate_mean_cv_scores()</code>, <code>evaluate_test_metrics()</code>: Performance metrics</li>
-<li><code>plot_metrics()</code>, <code>plot_feature_importance()</code>: Diagnostic plots</li>
-<li><code>calculate_overlap_coefficients()</code>, <code>plot_overlap_heatmaps()</code>: Gene set comparison</li>
-</ul></li>
-<li><strong>Bioinformatics integration</strong>:
-<ul>
-<li><code>GO_enrichment_analysis()</code>: clusterProfiler-based enrichment</li>
-<li><code>run_simplify_enrichment()</code>, <code>run_multiple_simplifyGO()</code>: GO term simplification</li>
-<li><code>annotate_gene_lists()</code>: Convert symbols to IDs</li>
-</ul></li>
+<li><p>Edit <code>.qmd</code> files in <code>/Users/zero/Desktop/GeneSelectR/quarto/</code></p></li>
+<li><p>Re-render: <code>cd quarto &amp;&amp; quarto render</code></p></li>
+<li><p>Deploy:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /tmp <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> geneselectr-deploy</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/jixing475/GeneSelectR.git geneselectr-deploy</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> geneselectr-deploy</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout gh-pages</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> <span class="pp">*</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> <span class="at">-r</span> /Users/zero/Desktop/GeneSelectR/quarto/_site/. .</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> _site  <span class="co"># Remove nested _site if exists</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">touch</span> .nojekyll</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add <span class="at">-A</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"docs: Update website"</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin gh-pages</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ol>
 </section>
-<section id="python-components-instpython" class="level3" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="python-components-instpython"><span class="header-section-number">2.2</span> Python Components (<code>inst/python/</code>)</h3>
-<p>Python modules handle computationally intensive tasks:</p>
+<section id="full-rebuild" class="level3" data-number="1.5.2">
+<h3 data-number="1.5.2" class="anchored" data-anchor-id="full-rebuild"><span class="header-section-number">1.5.2</span> Full Rebuild</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Users/zero/Desktop/GeneSelectR/quarto</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Then follow deploy steps above</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="github-pages-configuration" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="github-pages-configuration"><span class="header-section-number">1.6</span> GitHub Pages Configuration</h2>
+<ul>
+<li><strong>Source</strong>: <code>gh-pages</code> branch, <code>/</code> (root) directory</li>
+<li><strong>Custom domain</strong>: None (using default github.io)</li>
+<li><strong>HTTPS</strong>: Enforced</li>
+<li><strong>Build type</strong>: Legacy (manual deployment, not GitHub Actions)</li>
+</ul>
+</section>
+<section id="troubleshooting" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="troubleshooting"><span class="header-section-number">1.7</span> Troubleshooting</h2>
+<section id="website-not-updating" class="level3" data-number="1.7.1">
+<h3 data-number="1.7.1" class="anchored" data-anchor-id="website-not-updating"><span class="header-section-number">1.7.1</span> Website not updating</h3>
 <ol type="1">
-<li><strong><code>GeneSelectR.py</code></strong>: Core pipeline execution
-<ul>
-<li>Grid search with cross-validation</li>
-<li>Feature importance calculation</li>
-<li>Model training and evaluation</li>
-</ul></li>
-<li><strong><code>fit_and_evaluate_pipelines.py</code></strong>: Test set evaluation
-<ul>
-<li>Out-of-sample performance metrics</li>
-<li>Standardized scoring across methods</li>
-</ul></li>
-<li><strong><code>geneset_stability.py</code></strong>: Stability analysis
-<ul>
-<li>Feature selection across bootstrap samples</li>
-<li>Jaccard index for gene set overlap</li>
-</ul></li>
-<li><strong><code>correlation_filter.py</code></strong>: Preprocessing utilities
-<ul>
-<li>Redundancy removal via correlation thresholding</li>
-</ul></li>
+<li>Check deployment status: https://github.com/jixing475/GeneSelectR/deployments</li>
+<li>Hard refresh browser (Cmd+Shift+R on Mac, Ctrl+F5 on Windows)</li>
+<li>Wait 1-2 minutes for GitHub CDN to refresh</li>
 </ol>
 </section>
+<section id="styles-not-loading" class="level3" data-number="1.7.2">
+<h3 data-number="1.7.2" class="anchored" data-anchor-id="styles-not-loading"><span class="header-section-number">1.7.2</span> Styles not loading</h3>
+<p>Ensure <code>site_libs/</code> directory is present in <code>gh-pages</code> branch:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout gh-pages</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> site_libs/</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show: bootstrap, clipboard, quarto-html, quarto-nav, quarto-search</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="data-flow" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="data-flow"><span class="header-section-number">3</span> Data Flow</h2>
-<pre><code>Input Data (expression matrix + labels)
-    ↓
-[R] create_pipelines() → build sklearn Pipeline objects
-    ↓
-[Python] perform_grid_search() → hyperparameter optimization
-    ↓
-[R] PipelineResults object ← extract results via reticulate
-    ↓
-[R] get_feature_importances() → extract top genes
-    ↓
-[R] annotate_gene_lists() → map SYMBOL ↔ ENSEMBL ↔ ENTREZID
-    ↓
-[R] GO_enrichment_analysis() → functional interpretation</code></pre>
-</section>
-<section id="key-design-decisions" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="key-design-decisions"><span class="header-section-number">4</span> Key Design Decisions</h2>
-<section id="why-r-python" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="why-r-python"><span class="header-section-number">4.1</span> Why R + Python?</h3>
-<ul>
-<li><strong>R</strong>: Rich bioinformatics infrastructure (clusterProfiler, org.db packages), flexible visualization (ggplot2)</li>
-<li><strong>Python</strong>: Mature ML ecosystem (scikit-learn), efficient numerical computing</li>
-</ul>
-<p>The <code>reticulate</code> package bridges the two environments with minimal overhead.</p>
-</section>
-<section id="why-s4-classes" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="why-s4-classes"><span class="header-section-number">4.2</span> Why S4 Classes?</h3>
-<p>S4 provides:</p>
-<ul>
-<li>Formal slot definitions with type checking</li>
-<li>Method dispatch for generic functions</li>
-<li>Clear contracts for data structures</li>
-</ul>
-<p>The <code>PipelineResults</code> class ensures all pipeline outputs adhere to a consistent schema.</p>
-</section>
-<section id="why-multiple-feature-selection-methods" class="level3" data-number="4.3">
-<h3 data-number="4.3" class="anchored" data-anchor-id="why-multiple-feature-selection-methods"><span class="header-section-number">4.3</span> Why Multiple Feature Selection Methods?</h3>
-<p>Different algorithms capture different aspects of feature relevance:</p>
-<ul>
-<li><strong>LASSO</strong>: Linear dependencies via L1 regularization</li>
-<li><strong>Random Forest</strong>: Non-linear interactions via tree-based importance</li>
-<li><strong>Univariate</strong>: Marginal associations (fast, interpretable)</li>
-<li><strong>Boruta</strong>: All-relevant features via shadow features</li>
-</ul>
-<p>Ensemble approaches often yield more robust signatures than single methods.</p>
+<section id="broken-links" class="level3" data-number="1.7.3">
+<h3 data-number="1.7.3" class="anchored" data-anchor-id="broken-links"><span class="header-section-number">1.7.3</span> Broken links</h3>
+<p>Check that all <code>.qmd</code> files rendered successfully:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /Users/zero/Desktop/GeneSelectR/quarto</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
-<section id="reading-guide" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="reading-guide"><span class="header-section-number">5</span> Reading Guide</h2>
-<p>Subsequent chapters follow the typical GeneSelectR workflow:</p>
+<section id="manual-push-if-needed" class="level2" data-number="1.8">
+<h2 data-number="1.8" class="anchored" data-anchor-id="manual-push-if-needed"><span class="header-section-number">1.8</span> Manual Push (If Needed)</h2>
+<p>If automated deployment fails:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /tmp/geneselectr-deploy</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">-f</span> origin gh-pages</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note: Force push (<code>-f</code>) is safe here because <code>gh-pages</code> is deployment-only.</p>
+</section>
+<section id="verification" class="level2" data-number="1.9">
+<h2 data-number="1.9" class="anchored" data-anchor-id="verification"><span class="header-section-number">1.9</span> Verification</h2>
+<p>Check that your website is live:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-I</span> https://jixing475.github.io/GeneSelectR/</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Should return: HTTP/2 200</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Or open in browser:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">open</span> https://jixing475.github.io/GeneSelectR/</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># macOS</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Or</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo view jixing475/GeneSelectR <span class="at">--web</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="important-notes" class="level2" data-number="1.10">
+<h2 data-number="1.10" class="anchored" data-anchor-id="important-notes"><span class="header-section-number">1.10</span> Important Notes</h2>
 <ol type="1">
-<li><strong>Setup</strong> (Ch 2): Environment configuration with <code>uv</code> and <code>reticulate</code></li>
-<li><strong>Core</strong> (Ch 3-5): Class definitions, Python integration, pipeline mechanics</li>
-<li><strong>Analysis</strong> (Ch 6-9): Metrics, importance, overlap, and enrichment</li>
-<li><strong>Demo</strong> (Ch 10): End-to-end reproducible example</li>
-<li><strong>Synthesis</strong> (Ch 11): Design reflections and extensions</li>
-</ol>
-<p>Each chapter is self-contained with executable code chunks using test fixtures to ensure fast rendering.</p>
-</section>
-<section id="entry-points-for-code-exploration" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="entry-points-for-code-exploration"><span class="header-section-number">6</span> Entry Points for Code Exploration</h2>
+<li><p><strong>Source vs Deployment</strong>:</p>
 <ul>
-<li><strong>Start here</strong>: <code>R/GeneSelectR.R</code> (main workflow functions)</li>
-<li><strong>Data structures</strong>: <code>R/classes.R</code> (S4 definitions)</li>
-<li><strong>Python interface</strong>: <code>inst/python/GeneSelectR.py</code> (core ML logic)</li>
-<li><strong>Example usage</strong>: <code>tests/testthat/test-*.R</code> (unit tests as usage examples)</li>
-</ul>
+<li><code>main</code> branch = source code</li>
+<li><code>gh-pages</code> branch = deployed website</li>
+</ul></li>
+<li><p><strong>Don’t edit gh-pages directly</strong>: Always edit <code>.qmd</code> files, render, then deploy</p></li>
+<li><p><strong>Caching</strong>: Quarto caches results. To force rebuild:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">quarto</span> render <span class="at">--cache-refresh</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Assets</strong>: The <code>site_libs/</code> directory contains ~700KB of assets. This is normal for Quarto sites.</p></li>
+</ol>
+</section>
+<section id="next-steps" class="level2" data-number="1.11">
+<h2 data-number="1.11" class="anchored" data-anchor-id="next-steps"><span class="header-section-number">1.11</span> Next Steps</h2>
+<ol type="1">
+<li>Visit https://jixing475.github.io/GeneSelectR/ to see your site</li>
+<li>Share the URL with collaborators</li>
+<li>Consider adding a custom domain (optional)</li>
+<li>Set up GitHub Actions for automatic deployment on push (optional)</li>
+</ol>
 <hr>
-<p><strong>Next</strong>: <a href="./02_setup_uv_reticulate.html">Environment Setup with uv and reticulate</a></p>
+<p><strong>Deployment completed</strong>: 2025-11-04 21:48 <strong>Status</strong>: ✅ Live and accessible</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -439,7 +471,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
+      var filterRegex = new RegExp("https:\/\/jixing475\.github\.io\/GeneSelectR\/");
     var isInternal = (href) => {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
@@ -771,4 +803,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jixing475/GeneSelectR/edit/main/DEPLOYMENT.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jixing475/GeneSelectR/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
